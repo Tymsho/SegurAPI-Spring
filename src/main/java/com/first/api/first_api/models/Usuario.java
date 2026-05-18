@@ -1,8 +1,8 @@
 package com.first.api.first_api.models;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.Data;
-import java.util.Set;
 
 @Entity
 @Table(name = "usuarios")
@@ -19,13 +19,15 @@ public class Usuario {
 
     private String password;
 
-    private boolean activo = true; // Para baja lógica[cite: 1]
+    private boolean activo = false;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "usuarios_roles",
-        joinColumns = @JoinColumn(name = "usuario_id"),
-        inverseJoinColumns = @JoinColumn(name = "rol_id")
-    )
-    private Set<Rol> roles;
+    @Column(name = "codigo_verificacion")
+    private String codigoVerificacion;
+
+    @Column(name = "codigo_vencimiento")
+    private LocalDateTime codigoVencimiento;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Rol rol;
 }

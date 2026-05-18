@@ -1,7 +1,7 @@
 package com.first.api.first_api.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.first.api.first_api.models.TipoPago;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
 
@@ -9,27 +9,34 @@ import java.time.LocalDate;
 public class PolizaDTO {
     private Long id;
 
-    @NotBlank(message = "El número de póliza es requerido")
-    private String numeroPoliza;
+    @NotBlank(message = "El número de póliza es obligatorio")
+    private String nroPza;
 
-    @NotNull(message = "La fecha de inicio es requerida")
-    private LocalDate fechaInicio;
+    @NotNull(message = "El cliente (tomador) es obligatorio")
+    private Long clienteId; // ID del cliente asociado
 
-    @NotNull(message = "La fecha de fin es requerida")
-    private LocalDate fechaFin;
-    
-    // --- Campos para LECTURA (Dashboard) ---
-    private String nombreCliente;
-    private String nombreCompania;
-    private String nombreRamo;
+    @NotNull(message = "El tipo de pago es obligatorio")
+    private TipoPago tipoPago;
 
-    // --- Campos para ESCRITURA (Crear/Actualizar) ---
-    @NotNull(message = "El ID del cliente es obligatorio")
-    private Long clienteId;
+    @NotNull(message = "La fecha de inicio de vigencia es obligatoria")
+    private LocalDate inicioVigencia;
 
-    @NotNull(message = "El ID de la compañía es obligatorio")
+    @NotNull(message = "La fecha de fin de vigencia es obligatoria")
+    private LocalDate finVigencia;
+
+    @NotNull(message = "El ramo es obligatorio")
+    private Long ramoId;
+
+    @NotNull(message = "La compañía aseguradora es obligatoria")
     private Long companiaId;
 
-    @NotNull(message = "El ID del ramo es obligatorio")
-    private Long ramoId;
+    private String tipoFacturacion;
+
+    @Min(value = 0, message = "La prima no puede ser negativa")
+    private Double prima;
+
+    @DecimalMin(value = "0.01", message = "El premio debe ser mayor a cero")
+    private Double premio;
+    
+    // El productorId tampoco se pide acá, se asigna en el servicio mediante el token
 }

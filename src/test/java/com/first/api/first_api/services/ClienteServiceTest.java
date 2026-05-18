@@ -34,7 +34,7 @@ class ClienteServiceTest {
         clientePrueba.setId(1L);
         clientePrueba.setNombre("Juan");
         clientePrueba.setApellido("Perez");
-        clientePrueba.setDniCuit("12345678");
+        clientePrueba.setDni("12345678");
         clientePrueba.setEmail("juan@ejemplo.com");
         clientePrueba.setActivo(true);
     }
@@ -50,7 +50,7 @@ class ClienteServiceTest {
         // ASSERT
         assertTrue(resultado.isPresent());
         assertEquals("Juan", resultado.get().getNombre());
-        assertEquals("12345678", resultado.get().getDniCuit());
+        assertEquals("12345678", resultado.get().getDni());
         verify(clienteRepository, times(1)).findById(1L);
     }
 

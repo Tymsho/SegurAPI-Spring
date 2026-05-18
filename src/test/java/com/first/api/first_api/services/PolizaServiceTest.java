@@ -32,10 +32,10 @@ class PolizaServiceTest {
         MockitoAnnotations.openMocks(this);
         polizaPrueba = new Poliza();
         polizaPrueba.setId(1L);
-        polizaPrueba.setNumeroPoliza("POL-123");
-        polizaPrueba.setFechaInicio(LocalDate.now());
-        polizaPrueba.setFechaFin(LocalDate.now().plusYears(1));
-        polizaPrueba.setActiva(true);
+        polizaPrueba.setNroPza("POL-123");
+        polizaPrueba.setInicioVigencia(LocalDate.now());
+        polizaPrueba.setFinVigencia(LocalDate.now().plusYears(1));
+        polizaPrueba.setActivo(true);
     }
 
     @Test
@@ -48,7 +48,7 @@ class PolizaServiceTest {
 
         // ASSERT
         assertTrue(resultado.isPresent());
-        assertEquals("POL-123", resultado.get().getNumeroPoliza());
+        assertEquals("POL-123", resultado.get().getNroPza());
         verify(polizaRepository, times(1)).findById(1L);
     }
 
