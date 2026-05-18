@@ -4,8 +4,8 @@ Esta es la API principal del trabajo práctico, desarrollada en **Spring Boot (J
 
 ## ⚙️ Características y Requisitos Cumplidos
 * **Arquitectura en Capas:** Controladores, Servicios, Repositorios y uso estricto de **DTOs** para Requests y Responses.
-* **Seguridad (JWT):** Autenticación Stateless basada en **JSON Web Tokens** y protección de rutas por roles (`ADMIN` y `USER`).
-* **Base de Datos Relacional:** Configurada para MySQL (`first_api`) mediante Spring Data JPA. Incluye relaciones complejas (`OneToMany`, `ManyToOne`, `ManyToMany`).
+* **Seguridad (JWT):** Autenticación Stateless basada en **JSON Web Tokens** y protección de rutas por roles (`ADMIN` y `PRODUCTOR`).
+* **Base de Datos Relacional:** Configurada para MySQL (`seguros_db`) mediante Spring Data JPA. Incluye relaciones complejas (`OneToMany`, `ManyToOne`, `ManyToMany`).
 * **Consultas Personalizadas:** Implementación de filtrado mediante Query Params y sentencias JPQL (`@Query`).
 * **Manejo de Excepciones:** Validaciones (`@Valid`) y un `GlobalExceptionHandler` para capturar errores y retornar respuestas HTTP adecuadas.
 * **Testing:** Cobertura de pruebas en Servicios y Controladores utilizando JUnit, Mockito y MockMvc.
