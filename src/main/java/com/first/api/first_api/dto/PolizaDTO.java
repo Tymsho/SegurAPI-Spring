@@ -13,7 +13,8 @@ public class PolizaDTO {
     private String nroPza;
 
     @NotNull(message = "El cliente (tomador) es obligatorio")
-    private Long clienteId; // ID del cliente asociado
+    private Long clienteId;
+    private String nombreCliente; // Nombre del cliente asociado
 
     @NotNull(message = "El tipo de pago es obligatorio")
     private TipoPago tipoPago;
@@ -26,9 +27,11 @@ public class PolizaDTO {
 
     @NotNull(message = "El ramo es obligatorio")
     private Long ramoId;
+    private String nombreRamo;
 
     @NotNull(message = "La compañía aseguradora es obligatoria")
     private Long companiaId;
+    private String nombreCompania;
 
     private String tipoFacturacion;
 

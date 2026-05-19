@@ -34,28 +34,36 @@ public class PolizaService {
 
     // --- MAPEO MANUAL (Entidad a DTO) ---
     private PolizaDTO convertirADTO(Poliza poliza) {
-        PolizaDTO dto = new PolizaDTO();
-        dto.setId(poliza.getId());
-        dto.setNroPza(poliza.getNroPza());
-        dto.setInicioVigencia(poliza.getInicioVigencia());
-        dto.setFinVigencia(poliza.getFinVigencia());
-        dto.setTipoPago(poliza.getTipoPago());
-        dto.setTipoFacturacion(poliza.getTipoFacturacion());
-        dto.setPrima(poliza.getPrima());
-        dto.setPremio(poliza.getPremio());
-        
-        if (poliza.getTomador() != null) {
-            dto.setClienteId(poliza.getTomador().getId());
-        }
-        if (poliza.getCompania() != null) {
-            dto.setCompaniaId(poliza.getCompania().getId());
-        }
-        if (poliza.getRamo() != null) {
-            dto.setRamoId(poliza.getRamo().getId());
-        }
-        
-        return dto;
+    PolizaDTO dto = new PolizaDTO();
+    dto.setId(poliza.getId());
+    dto.setNroPza(poliza.getNroPza());
+    dto.setInicioVigencia(poliza.getInicioVigencia());
+    dto.setFinVigencia(poliza.getFinVigencia());
+    dto.setTipoPago(poliza.getTipoPago());
+    dto.setTipoFacturacion(poliza.getTipoFacturacion());
+    dto.setPrima(poliza.getPrima());
+    dto.setPremio(poliza.getPremio());
+    
+    // Mapeo del Tomador (Cliente)
+    if (poliza.getTomador() != null) {
+        dto.setClienteId(poliza.getTomador().getId()); // Saca el ID numérico
+        dto.setNombreCliente(poliza.getTomador().getNombre() + " " + poliza.getTomador().getApellido()); // Saca el String
     }
+    
+    // Mapeo de la Compañía
+    if (poliza.getCompania() != null) {
+        dto.setCompaniaId(poliza.getCompania().getId()); // Ojo acá: .getCompania().getId()
+        dto.setNombreCompania(poliza.getCompania().getNombre()); // Saca el String
+    }
+    
+    // Mapeo del Ramo
+    if (poliza.getRamo() != null) {
+        dto.setRamoId(poliza.getRamo().getId()); // Ojo acá: .getRamo().getId()
+        dto.setNombreRamo(poliza.getRamo().getNombre()); // Saca el String
+    }
+    
+    return dto;
+}
 
     // --- MAPEO INVERSO (DTO a Entidad) ---
     private Poliza convertirAEntidad(PolizaDTO dto, String emailLogueado) {
