@@ -2,7 +2,6 @@ package com.first.api.first_api.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.util.Set;
 
 @Entity
 @Table(name = "ramos")
@@ -16,7 +15,4 @@ public class Ramo {
     private String nombre; // Ej: Automotor, Vida, Hogar
 
     private boolean activo = true;
-
-    @ManyToMany(mappedBy = "ramos")
-    private Set<Compania> companias;
 }
