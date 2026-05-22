@@ -15,11 +15,16 @@ import com.first.api.first_api.models.Cliente;
 import com.first.api.first_api.dto.ClienteDTO;
 import com.first.api.first_api.repositories.ClienteRepository;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
+import com.first.api.first_api.mappers.ClienteMapper;
 
+@SuppressWarnings("null")
 class ClienteServiceTest {
 
     @Mock
     private ClienteRepository clienteRepository;
+
+    @Mock
+    private ClienteMapper clienteMapper;
 
     @InjectMocks
     private ClienteService clienteService;
@@ -43,6 +48,11 @@ class ClienteServiceTest {
     void shouldReturnClienteDtoWhenIdExists() {
         // ARRANGE
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(clientePrueba));
+        
+        ClienteDTO dtoPrueba = new ClienteDTO();
+        dtoPrueba.setNombre("Juan");
+        dtoPrueba.setDni("12345678");
+        when(clienteMapper.toDTO(clientePrueba)).thenReturn(dtoPrueba);
 
         // ACT
         Optional<ClienteDTO> resultado = clienteService.buscarPorId(1L);

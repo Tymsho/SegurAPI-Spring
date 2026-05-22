@@ -9,6 +9,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser; // Import para simular usuario
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.context.annotation.Import;
+import com.first.api.first_api.security.JwtAuthenticationFilter;
 
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf; // Import para token
@@ -18,6 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ClienteController.class)
+@Import(JwtAuthenticationFilter.class)
+@SuppressWarnings("null")
 class ClienteControllerTest {
 
     @Autowired
@@ -25,6 +29,12 @@ class ClienteControllerTest {
 
     @MockitoBean
     private ClienteService clienteService;
+
+    @MockitoBean
+    private com.first.api.first_api.security.JwtUtils jwtUtils;
+
+    @MockitoBean
+    private com.first.api.first_api.security.UserDetailsServiceImpl userDetailsService;
 
     @Test
     @WithMockUser(roles = "ADMIN") // Simulamos que somos ADMIN
@@ -59,7 +69,7 @@ class ClienteControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.nombre").exists())
                 .andExpect(jsonPath("$.apellido").exists())
-                .andExpect(jsonPath("$.dniCuit").exists())
-                .andExpect(jsonPath("$.email").value("Formato de email inválido"));
+                .andExpect(jsonPath("$.dni").exists())
+                .andExpect(jsonPath("$.email").value("El formato del email es inválido"));
     }
 }

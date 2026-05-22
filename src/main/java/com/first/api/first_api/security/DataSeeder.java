@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
+@SuppressWarnings("null")
 public class DataSeeder implements CommandLineRunner {
 
     @Autowired private UsuarioRepository usuarioRepository;
@@ -20,6 +22,7 @@ public class DataSeeder implements CommandLineRunner {
     @Autowired private PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         cargarGeografia();
         cargarUsuarios();

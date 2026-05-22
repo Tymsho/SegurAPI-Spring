@@ -13,11 +13,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import com.first.api.first_api.mappers.ClienteMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
+@SuppressWarnings("null")
 public class ClienteService {
 
     @Autowired
@@ -29,49 +33,39 @@ public class ClienteService {
     @Autowired
     private LocalidadRepository localidadRepository;
 
-    // --- MAPEO MANUAL (Entidad a DTO) ---
-    private ClienteDTO convertirADTO(Cliente cliente) {
-        ClienteDTO dto = new ClienteDTO();
-        dto.setId(cliente.getId());
-        dto.setNombre(cliente.getNombre());
-        dto.setApellido(cliente.getApellido());
-        dto.setDni(cliente.getDni());
-        dto.setTelefono(cliente.getTelefono());
-        dto.setEmail(cliente.getEmail());
-        return dto;
-    }
+    @Autowired
+    private ClienteMapper clienteMapper;
 
     // --- MÉTODOS DEL SERVICIO (Devuelven DTOs) ---
 
     // Obtener solo clientes activos
-    public List<ClienteDTO> obtenerTodosActivos(String nombre) {
+    public Page<ClienteDTO> obtenerTodosActivos(String nombre, Pageable pageable) {
         // 1. Obtener el productor logueado
         String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        List<Cliente> clientes;
+        Page<Cliente> clientes;
 
         // 2. Filtrar asegurando que solo traiga SU cartera
         if (nombre != null && !nombre.isEmpty()) {
             clientes = clienteRepository.findByNombreContainingIgnoreCaseAndActivoTrueAndProductorEmail(nombre,
-                    emailLogueado);
+                    emailLogueado, pageable);
         } else {
-            clientes = clienteRepository.findByActivoTrueAndProductorEmail(emailLogueado);
+            clientes = clienteRepository.findByActivoTrueAndProductorEmail(emailLogueado, pageable);
         }
 
-        // 3. Mapear a DTO (esto asume que tenés un método mapearADto en tu servicio)
-        return clientes.stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
+        // 3. Mapear a DTO
+        return clientes.map(clienteMapper::toDTO);
     }
 
     // Buscar por ID
     public Optional<ClienteDTO> buscarPorId(Long id) {
         return clienteRepository.findById(id)
                 .filter(Cliente::isActivo)
-                .map(this::convertirADTO);
+                .map(clienteMapper::toDTO);
     }
 
     // Guardar (Recibe una Entidad por ahora, pero devuelve el DTO guardado)
+    @Transactional
     public ClienteDTO crearCliente(ClienteDTO dto) {
         // 1. Quién está haciendo la petición?
         String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -89,27 +83,20 @@ public class ClienteService {
                 .orElseThrow(() -> new RuntimeException("Localidad no encontrada"));
 
         // 4. Mapear y guardar
-        Cliente cliente = new Cliente();
-        cliente.setNombre(dto.getNombre());
-        cliente.setApellido(dto.getApellido());
-        cliente.setDni(dto.getDni());
-        cliente.setEmail(dto.getEmail());
-        cliente.setSexo(dto.getSexo());
-        cliente.setTipoIva(dto.getTipoIva());
+        Cliente cliente = clienteMapper.toEntity(dto);
         cliente.setLocalidad(localidad);
-        // ... setear el resto de los campos ...
 
         // 5. Asignar el dueño (Aislamiento de datos)
         cliente.setProductor(productor);
 
         Cliente guardado = clienteRepository.save(cliente);
 
-        // Retornar tu DTO mapeado (hacelo según tu lógica actual)
-        dto.setId(guardado.getId());
-        return dto;
+        // Retornar tu DTO mapeado
+        return clienteMapper.toDTO(guardado);
     }
 
     // Baja Lógica (No devuelve nada, pero anula el registro)
+    @Transactional
     public void bajaLogica(Long id) {
         Optional<Cliente> clienteOpt = clienteRepository.findById(id);
         if (clienteOpt.isPresent()) {
@@ -121,6 +108,7 @@ public class ClienteService {
         }
     }
 
+    @Transactional
     public ClienteDTO actualizarCliente(Long id, ClienteDTO detallesDTO) {
         Cliente clienteExistente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + id));
@@ -131,7 +119,14 @@ public class ClienteService {
         clienteExistente.setTelefono(detallesDTO.getTelefono());
         clienteExistente.setEmail(detallesDTO.getEmail());
 
+        // Si cambia localidad
+        if (detallesDTO.getLocalidadId() != null) {
+            Localidad localidad = localidadRepository.findById(detallesDTO.getLocalidadId())
+                .orElseThrow(() -> new RuntimeException("Localidad no encontrada"));
+            clienteExistente.setLocalidad(localidad);
+        }
+
         Cliente clienteActualizado = clienteRepository.save(clienteExistente);
-        return convertirADTO(clienteActualizado);
+        return clienteMapper.toDTO(clienteActualizado);
     }
 }

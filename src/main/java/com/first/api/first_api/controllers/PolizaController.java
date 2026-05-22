@@ -4,11 +4,12 @@ import com.first.api.first_api.dto.PolizaDTO;
 import com.first.api.first_api.services.PolizaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/polizas")
@@ -24,9 +25,13 @@ public class PolizaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PolizaDTO>> obtenerMisPolizas() {
-        // Trae las activas del productor logueado automáticamente
-        List<PolizaDTO> polizas = polizaService.obtenerMisPolizasActivas();
+    public ResponseEntity<Page<PolizaDTO>> obtenerMisPolizas(
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) Long companiaId,
+            @RequestParam(required = false) Long ramoId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        
+        Page<PolizaDTO> polizas = polizaService.obtenerMisPolizasActivas(clienteId, companiaId, ramoId, pageable);
         return ResponseEntity.ok(polizas);
     }
 

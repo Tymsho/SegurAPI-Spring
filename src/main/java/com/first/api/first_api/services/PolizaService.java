@@ -8,11 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import com.first.api.first_api.mappers.PolizaMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
+@SuppressWarnings("null")
 public class PolizaService {
 
     @Autowired private PolizaRepository polizaRepository;
@@ -20,6 +24,7 @@ public class PolizaService {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private RamoRepository ramoRepository;
     @Autowired private CompaniaRepository companiaRepository;
+    @Autowired private PolizaMapper polizaMapper;
 
     // --- UTILIDAD: Obtener el Productor Logueado ---
     private String getEmailLogueado() {
@@ -32,49 +37,9 @@ public class PolizaService {
                 .orElseThrow(() -> new RuntimeException("Productor no autorizado o no encontrado"));
     }
 
-    // --- MAPEO MANUAL (Entidad a DTO) ---
-    private PolizaDTO convertirADTO(Poliza poliza) {
-    PolizaDTO dto = new PolizaDTO();
-    dto.setId(poliza.getId());
-    dto.setNroPza(poliza.getNroPza());
-    dto.setInicioVigencia(poliza.getInicioVigencia());
-    dto.setFinVigencia(poliza.getFinVigencia());
-    dto.setTipoPago(poliza.getTipoPago());
-    dto.setTipoFacturacion(poliza.getTipoFacturacion());
-    dto.setPrima(poliza.getPrima());
-    dto.setPremio(poliza.getPremio());
-    
-    // Mapeo del Tomador (Cliente)
-    if (poliza.getTomador() != null) {
-        dto.setClienteId(poliza.getTomador().getId()); // Saca el ID numérico
-        dto.setNombreCliente(poliza.getTomador().getNombre() + " " + poliza.getTomador().getApellido()); // Saca el String
-    }
-    
-    // Mapeo de la Compañía
-    if (poliza.getCompania() != null) {
-        dto.setCompaniaId(poliza.getCompania().getId()); // Ojo acá: .getCompania().getId()
-        dto.setNombreCompania(poliza.getCompania().getNombre()); // Saca el String
-    }
-    
-    // Mapeo del Ramo
-    if (poliza.getRamo() != null) {
-        dto.setRamoId(poliza.getRamo().getId()); // Ojo acá: .getRamo().getId()
-        dto.setNombreRamo(poliza.getRamo().getNombre()); // Saca el String
-    }
-    
-    return dto;
-}
-
     // --- MAPEO INVERSO (DTO a Entidad) ---
     private Poliza convertirAEntidad(PolizaDTO dto, String emailLogueado) {
-        Poliza poliza = new Poliza();
-        poliza.setNroPza(dto.getNroPza());
-        poliza.setInicioVigencia(dto.getInicioVigencia());
-        poliza.setFinVigencia(dto.getFinVigencia());
-        poliza.setTipoPago(dto.getTipoPago());
-        poliza.setTipoFacturacion(dto.getTipoFacturacion());
-        poliza.setPrima(dto.getPrima());
-        poliza.setPremio(dto.getPremio());
+        Poliza poliza = polizaMapper.toEntity(dto);
 
         // 1. Validar y asignar el Cliente (Garantizando que sea de SU cartera)
         Cliente tomador = clienteRepository.findByIdAndProductorEmail(dto.getClienteId(), emailLogueado)
@@ -95,6 +60,7 @@ public class PolizaService {
 
     // --- MÉTODOS DEL SERVICIO ---
 
+    @Transactional
     public PolizaDTO guardarPoliza(PolizaDTO polizaDTO) {
         String email = getEmailLogueado();
         Usuario productor = getProductorLogueado();
@@ -105,23 +71,21 @@ public class PolizaService {
         poliza.setProductor(productor);
         
         Poliza guardada = polizaRepository.save(poliza);
-        return convertirADTO(guardada);
+        return polizaMapper.toDTO(guardada);
     }
 
     public Optional<PolizaDTO> buscarPorId(Long id) {
         // Solo puede buscarla si le pertenece a él
         return polizaRepository.findByIdAndProductorEmail(id, getEmailLogueado())
-                .map(this::convertirADTO);
+                .map(polizaMapper::toDTO);
     }
 
-    public List<PolizaDTO> obtenerMisPolizasActivas() {
-        // Eliminamos el parámetro usuarioId. El sistema sabe quién es por el Token.
-        return polizaRepository.findByProductorEmail(getEmailLogueado()).stream()
-                .filter(Poliza::isActivo)
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
+    public Page<PolizaDTO> obtenerMisPolizasActivas(Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
+        return polizaRepository.findMisPolizasFiltradas(getEmailLogueado(), clienteId, companiaId, ramoId, pageable)
+                .map(polizaMapper::toDTO);
     }
 
+    @Transactional
     public void anularPoliza(Long id) {
         // Valida propiedad antes de anular
         Poliza poliza = polizaRepository.findByIdAndProductorEmail(id, getEmailLogueado())
@@ -131,6 +95,7 @@ public class PolizaService {
         polizaRepository.save(poliza);
     }
 
+    @Transactional
     public PolizaDTO actualizarPoliza(Long id, PolizaDTO detallesDTO) {
         String email = getEmailLogueado();
 
@@ -154,6 +119,6 @@ public class PolizaService {
         polizaExistente.setRamo(actualizacion.getRamo());
 
         Poliza polizaActualizada = polizaRepository.save(polizaExistente);
-        return convertirADTO(polizaActualizada);
+        return polizaMapper.toDTO(polizaActualizada);
     }
 }

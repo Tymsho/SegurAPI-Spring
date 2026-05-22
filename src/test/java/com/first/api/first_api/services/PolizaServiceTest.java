@@ -16,11 +16,18 @@ import com.first.api.first_api.models.Poliza;
 import com.first.api.first_api.dto.PolizaDTO;
 import com.first.api.first_api.repositories.PolizaRepository;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
+import com.first.api.first_api.mappers.PolizaMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 class PolizaServiceTest {
 
     @Mock
     private PolizaRepository polizaRepository;
+
+    @Mock
+    private PolizaMapper polizaMapper;
 
     @InjectMocks
     private PolizaService polizaService;
@@ -30,6 +37,13 @@ class PolizaServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("test@mail.com");
+        SecurityContextHolder.setContext(securityContext);
+
         polizaPrueba = new Poliza();
         polizaPrueba.setId(1L);
         polizaPrueba.setNroPza("POL-123");
@@ -41,7 +55,11 @@ class PolizaServiceTest {
     @Test
     void shouldReturnPolizaDtoWhenIdExists() {
         // ARRANGE
-        when(polizaRepository.findById(1L)).thenReturn(Optional.of(polizaPrueba));
+        when(polizaRepository.findByIdAndProductorEmail(1L, "test@mail.com")).thenReturn(Optional.of(polizaPrueba));
+        
+        PolizaDTO dtoPrueba = new PolizaDTO();
+        dtoPrueba.setNroPza("POL-123");
+        when(polizaMapper.toDTO(polizaPrueba)).thenReturn(dtoPrueba);
 
         // ACT
         Optional<PolizaDTO> resultado = polizaService.buscarPorId(1L);
@@ -49,13 +67,13 @@ class PolizaServiceTest {
         // ASSERT
         assertTrue(resultado.isPresent());
         assertEquals("POL-123", resultado.get().getNroPza());
-        verify(polizaRepository, times(1)).findById(1L);
+        verify(polizaRepository, times(1)).findByIdAndProductorEmail(1L, "test@mail.com");
     }
 
     @Test
     void shouldThrowExceptionWhenActualizarFails() {
         // ARRANGE
-        when(polizaRepository.findById(999L)).thenReturn(Optional.empty());
+        when(polizaRepository.findByIdAndProductorEmail(999L, "test@mail.com")).thenReturn(Optional.empty());
         PolizaDTO dtoActualizacion = new PolizaDTO();
         
         // ACT & ASSERT
@@ -63,6 +81,6 @@ class PolizaServiceTest {
             polizaService.actualizarPoliza(999L, dtoActualizacion);
         });
 
-        assertEquals("Póliza no encontrada con id: 999", exception.getMessage());
+        assertEquals("Póliza no encontrada o acceso denegado", exception.getMessage());
     }
 }
