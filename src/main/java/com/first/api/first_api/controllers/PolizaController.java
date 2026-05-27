@@ -1,6 +1,7 @@
 package com.first.api.first_api.controllers;
 
-import com.first.api.first_api.dto.PolizaDTO;
+import com.first.api.first_api.dtorequest.PolizaRequest;
+import com.first.api.first_api.dtoresponse.PolizaResponse;
 import com.first.api.first_api.services.PolizaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,34 +20,34 @@ public class PolizaController {
     private PolizaService polizaService;
 
     @PostMapping
-    public ResponseEntity<PolizaDTO> crearPoliza(@Valid @RequestBody PolizaDTO polizaDTO) {
-        PolizaDTO nuevaPoliza = polizaService.guardarPoliza(polizaDTO);
+    public ResponseEntity<PolizaResponse> crearPoliza(@Valid @RequestBody PolizaRequest polizaDTO) {
+        PolizaResponse nuevaPoliza = polizaService.guardarPoliza(polizaDTO);
         return new ResponseEntity<>(nuevaPoliza, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<PolizaDTO>> obtenerMisPolizas(
+    public ResponseEntity<Page<PolizaResponse>> obtenerMisPolizas(
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) Long companiaId,
             @RequestParam(required = false) Long ramoId,
             @PageableDefault(size = 10) Pageable pageable) {
         
-        Page<PolizaDTO> polizas = polizaService.obtenerMisPolizasActivas(clienteId, companiaId, ramoId, pageable);
+        Page<PolizaResponse> polizas = polizaService.obtenerMisPolizasActivas(clienteId, companiaId, ramoId, pageable);
         return ResponseEntity.ok(polizas);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PolizaDTO> obtenerPolizaPorId(@PathVariable("id") Long id) {
+    public ResponseEntity<PolizaResponse> obtenerPolizaPorId(@PathVariable("id") Long id) {
         return polizaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PolizaDTO> actualizarPoliza(
+    public ResponseEntity<PolizaResponse> actualizarPoliza(
             @PathVariable("id") Long id, 
-            @Valid @RequestBody PolizaDTO polizaDTO) {
-        PolizaDTO actualizada = polizaService.actualizarPoliza(id, polizaDTO);
+            @Valid @RequestBody PolizaRequest polizaDTO) {
+        PolizaResponse actualizada = polizaService.actualizarPoliza(id, polizaDTO);
         return ResponseEntity.ok(actualizada);
     }
 

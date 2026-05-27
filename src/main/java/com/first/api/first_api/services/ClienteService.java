@@ -3,7 +3,8 @@ package com.first.api.first_api.services;
 import com.first.api.first_api.models.Cliente;
 import com.first.api.first_api.models.Localidad;
 import com.first.api.first_api.models.Usuario;
-import com.first.api.first_api.dto.ClienteDTO;
+import com.first.api.first_api.dtorequest.ClienteRequest;
+import com.first.api.first_api.dtoresponse.ClienteResponse;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.repositories.ClienteRepository;
 import com.first.api.first_api.repositories.LocalidadRepository;
@@ -39,7 +40,7 @@ public class ClienteService {
     // --- MÉTODOS DEL SERVICIO (Devuelven DTOs) ---
 
     // Obtener solo clientes activos
-    public Page<ClienteDTO> obtenerTodosActivos(String nombre, Pageable pageable) {
+    public Page<ClienteResponse> obtenerTodosActivos(String nombre, Pageable pageable) {
         // 1. Obtener el productor logueado
         String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -54,19 +55,19 @@ public class ClienteService {
         }
 
         // 3. Mapear a DTO
-        return clientes.map(clienteMapper::toDTO);
+        return clientes.map(clienteMapper::toResponse);
     }
 
     // Buscar por ID
-    public Optional<ClienteDTO> buscarPorId(Long id) {
+    public Optional<ClienteResponse> buscarPorId(Long id) {
         return clienteRepository.findById(id)
                 .filter(Cliente::isActivo)
-                .map(clienteMapper::toDTO);
+                .map(clienteMapper::toResponse);
     }
 
     // Guardar (Recibe una Entidad por ahora, pero devuelve el DTO guardado)
     @Transactional
-    public ClienteDTO crearCliente(ClienteDTO dto) {
+    public ClienteResponse crearCliente(ClienteRequest dto) {
         // 1. Quién está haciendo la petición?
         String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -92,7 +93,7 @@ public class ClienteService {
         Cliente guardado = clienteRepository.save(cliente);
 
         // Retornar tu DTO mapeado
-        return clienteMapper.toDTO(guardado);
+        return clienteMapper.toResponse(guardado);
     }
 
     // Baja Lógica (No devuelve nada, pero anula el registro)
@@ -109,7 +110,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO actualizarCliente(Long id, ClienteDTO detallesDTO) {
+    public ClienteResponse actualizarCliente(Long id, ClienteRequest detallesDTO) {
         Cliente clienteExistente = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + id));
 
@@ -127,6 +128,6 @@ public class ClienteService {
         }
 
         Cliente clienteActualizado = clienteRepository.save(clienteExistente);
-        return clienteMapper.toDTO(clienteActualizado);
+        return clienteMapper.toResponse(clienteActualizado);
     }
 }

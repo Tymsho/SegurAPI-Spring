@@ -1,6 +1,7 @@
 package com.first.api.first_api.controllers;
 
-import com.first.api.first_api.dto.ClienteDTO;
+import com.first.api.first_api.dtorequest.ClienteRequest;
+import com.first.api.first_api.dtoresponse.ClienteResponse;
 import com.first.api.first_api.services.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +20,22 @@ public class ClienteController {
     private ClienteService clienteService;
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> crearCliente(@Valid @RequestBody ClienteDTO clienteDTO) {
-        ClienteDTO nuevoCliente = clienteService.crearCliente(clienteDTO);
+    public ResponseEntity<ClienteResponse> crearCliente(@Valid @RequestBody ClienteRequest clienteDTO) {
+        ClienteResponse nuevoCliente = clienteService.crearCliente(clienteDTO);
         return new ResponseEntity<>(nuevoCliente, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<ClienteDTO>> obtenerClientes(
+    public ResponseEntity<Page<ClienteResponse>> obtenerClientes(
             @RequestParam(value = "nombre", required = false) String nombre,
             @PageableDefault(size = 10) Pageable pageable) {
-        Page<ClienteDTO> clientes = clienteService.obtenerTodosActivos(nombre, pageable);
+        Page<ClienteResponse> clientes = clienteService.obtenerTodosActivos(nombre, pageable);
         return ResponseEntity.ok(clientes);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClienteDTO> actualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteDTO clienteDTO) {
-        ClienteDTO actualizado = clienteService.actualizarCliente(id, clienteDTO);
+    public ResponseEntity<ClienteResponse> actualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequest clienteDTO) {
+        ClienteResponse actualizado = clienteService.actualizarCliente(id, clienteDTO);
         return ResponseEntity.ok(actualizado);
     }
 

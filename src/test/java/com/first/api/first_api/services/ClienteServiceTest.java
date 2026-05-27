@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.first.api.first_api.models.Cliente;
-import com.first.api.first_api.dto.ClienteDTO;
+import com.first.api.first_api.dtoresponse.ClienteResponse;
 import com.first.api.first_api.repositories.ClienteRepository;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.mappers.ClienteMapper;
@@ -49,13 +49,13 @@ class ClienteServiceTest {
         // ARRANGE
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(clientePrueba));
         
-        ClienteDTO dtoPrueba = new ClienteDTO();
+        ClienteResponse dtoPrueba = new ClienteResponse();
         dtoPrueba.setNombre("Juan");
         dtoPrueba.setDni("12345678");
-        when(clienteMapper.toDTO(clientePrueba)).thenReturn(dtoPrueba);
+        when(clienteMapper.toResponse(clientePrueba)).thenReturn(dtoPrueba);
 
         // ACT
-        Optional<ClienteDTO> resultado = clienteService.buscarPorId(1L);
+        Optional<ClienteResponse> resultado = clienteService.buscarPorId(1L);
 
         // ASSERT
         assertTrue(resultado.isPresent());

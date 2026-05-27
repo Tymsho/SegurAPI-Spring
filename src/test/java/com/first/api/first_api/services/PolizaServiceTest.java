@@ -13,7 +13,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.first.api.first_api.models.Poliza;
-import com.first.api.first_api.dto.PolizaDTO;
+import com.first.api.first_api.dtorequest.PolizaRequest;
+import com.first.api.first_api.dtoresponse.PolizaResponse;
 import com.first.api.first_api.repositories.PolizaRepository;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.mappers.PolizaMapper;
@@ -57,12 +58,12 @@ class PolizaServiceTest {
         // ARRANGE
         when(polizaRepository.findByIdAndProductorEmail(1L, "test@mail.com")).thenReturn(Optional.of(polizaPrueba));
         
-        PolizaDTO dtoPrueba = new PolizaDTO();
+        PolizaResponse dtoPrueba = new PolizaResponse();
         dtoPrueba.setNroPza("POL-123");
-        when(polizaMapper.toDTO(polizaPrueba)).thenReturn(dtoPrueba);
+        when(polizaMapper.toResponse(polizaPrueba)).thenReturn(dtoPrueba);
 
         // ACT
-        Optional<PolizaDTO> resultado = polizaService.buscarPorId(1L);
+        Optional<PolizaResponse> resultado = polizaService.buscarPorId(1L);
 
         // ASSERT
         assertTrue(resultado.isPresent());
@@ -74,7 +75,7 @@ class PolizaServiceTest {
     void shouldThrowExceptionWhenActualizarFails() {
         // ARRANGE
         when(polizaRepository.findByIdAndProductorEmail(999L, "test@mail.com")).thenReturn(Optional.empty());
-        PolizaDTO dtoActualizacion = new PolizaDTO();
+        PolizaRequest dtoActualizacion = new PolizaRequest();
         
         // ACT & ASSERT
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {

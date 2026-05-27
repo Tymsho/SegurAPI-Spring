@@ -1,6 +1,6 @@
 package com.first.api.first_api.controllers;
 
-import com.first.api.first_api.dto.UsuarioDTO;
+import com.first.api.first_api.dtorequest.UsuarioRequest;
 import com.first.api.first_api.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping("/registro")
-    public ResponseEntity<String> registrarUsuario(@Valid @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<String> registrarUsuario(@Valid @RequestBody UsuarioRequest usuarioDTO) {
         
         usuarioService.registrarUsuario(usuarioDTO);
         

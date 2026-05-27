@@ -1,6 +1,6 @@
 package com.first.api.first_api.controllers;
 
-import com.first.api.first_api.dto.UsuarioDTO;
+import com.first.api.first_api.dtorequest.UsuarioRequest;
 import com.first.api.first_api.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
@@ -22,7 +22,7 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody UsuarioDTO loginRequest) {
+    public Map<String, String> login(@RequestBody UsuarioRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 

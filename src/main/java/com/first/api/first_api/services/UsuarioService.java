@@ -1,6 +1,6 @@
 package com.first.api.first_api.services;
 
-import com.first.api.first_api.dto.UsuarioDTO;
+import com.first.api.first_api.dtorequest.UsuarioRequest;
 import com.first.api.first_api.models.Rol;
 import com.first.api.first_api.models.Usuario;
 import com.first.api.first_api.repositories.UsuarioRepository;
@@ -19,7 +19,7 @@ public class UsuarioService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Usuario registrarUsuario(UsuarioDTO dto) {
+    public Usuario registrarUsuario(UsuarioRequest dto) {
         Usuario nuevo = new Usuario();
         nuevo.setNombre(dto.getNombre());
         nuevo.setEmail(dto.getEmail());

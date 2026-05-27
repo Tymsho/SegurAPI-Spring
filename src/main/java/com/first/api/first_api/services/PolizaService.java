@@ -1,7 +1,8 @@
 package com.first.api.first_api.services;
 
 import com.first.api.first_api.models.*;
-import com.first.api.first_api.dto.PolizaDTO;
+import com.first.api.first_api.dtorequest.PolizaRequest;
+import com.first.api.first_api.dtoresponse.PolizaResponse;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class PolizaService {
     }
 
     // --- MAPEO INVERSO (DTO a Entidad) ---
-    private Poliza convertirAEntidad(PolizaDTO dto, String emailLogueado) {
+    private Poliza convertirAEntidad(PolizaRequest dto, String emailLogueado) {
         Poliza poliza = polizaMapper.toEntity(dto);
 
         // 1. Validar y asignar el Cliente (Garantizando que sea de SU cartera)
@@ -61,7 +62,7 @@ public class PolizaService {
     // --- MÉTODOS DEL SERVICIO ---
 
     @Transactional
-    public PolizaDTO guardarPoliza(PolizaDTO polizaDTO) {
+    public PolizaResponse guardarPoliza(PolizaRequest polizaDTO) {
         String email = getEmailLogueado();
         Usuario productor = getProductorLogueado();
 
@@ -71,18 +72,18 @@ public class PolizaService {
         poliza.setProductor(productor);
         
         Poliza guardada = polizaRepository.save(poliza);
-        return polizaMapper.toDTO(guardada);
+        return polizaMapper.toResponse(guardada);
     }
 
-    public Optional<PolizaDTO> buscarPorId(Long id) {
+    public Optional<PolizaResponse> buscarPorId(Long id) {
         // Solo puede buscarla si le pertenece a él
         return polizaRepository.findByIdAndProductorEmail(id, getEmailLogueado())
-                .map(polizaMapper::toDTO);
+                .map(polizaMapper::toResponse);
     }
 
-    public Page<PolizaDTO> obtenerMisPolizasActivas(Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
+    public Page<PolizaResponse> obtenerMisPolizasActivas(Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
         return polizaRepository.findMisPolizasFiltradas(getEmailLogueado(), clienteId, companiaId, ramoId, pageable)
-                .map(polizaMapper::toDTO);
+                .map(polizaMapper::toResponse);
     }
 
     @Transactional
@@ -96,7 +97,7 @@ public class PolizaService {
     }
 
     @Transactional
-    public PolizaDTO actualizarPoliza(Long id, PolizaDTO detallesDTO) {
+    public PolizaResponse actualizarPoliza(Long id, PolizaRequest detallesDTO) {
         String email = getEmailLogueado();
 
         // 1. Asegurar que la póliza a editar es suya
@@ -119,6 +120,6 @@ public class PolizaService {
         polizaExistente.setRamo(actualizacion.getRamo());
 
         Poliza polizaActualizada = polizaRepository.save(polizaExistente);
-        return polizaMapper.toDTO(polizaActualizada);
+        return polizaMapper.toResponse(polizaActualizada);
     }
 }

@@ -1,4 +1,4 @@
-package com.first.api.first_api.dto;
+package com.first.api.first_api.dtorequest;
 
 import com.first.api.first_api.models.Sexo;
 import com.first.api.first_api.models.TipoIva;
@@ -7,9 +7,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class ClienteDTO {
-    private Long id;
-
+public class ClienteRequest {
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
@@ -22,7 +20,7 @@ public class ClienteDTO {
     private String direccion;
 
     @NotNull(message = "La localidad es obligatoria")
-    private Long localidadId; // Pasamos solo el ID para simplificar el JSON de entrada
+    private Long localidadId;
 
     private String telefono;
 
@@ -34,10 +32,8 @@ public class ClienteDTO {
     private String dni;
 
     @NotNull(message = "El sexo es obligatorio")
-    private Sexo sexo; // Validación nativa del Enum
+    private Sexo sexo;
 
     @NotNull(message = "El tipo de IVA es obligatorio")
     private TipoIva tipoIva;
-    
-    // IMPORTANTE: Omitimos el productorId. No se recibe desde el front-end por seguridad.
 }
