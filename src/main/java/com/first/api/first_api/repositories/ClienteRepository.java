@@ -2,6 +2,8 @@ package com.first.api.first_api.repositories;
 
 import com.first.api.first_api.models.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,4 +26,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     // Trae los clientes activos de ESE productor, filtrando por una coincidencia en el nombre
     Page<Cliente> findByNombreContainingIgnoreCaseAndActivoTrueAndProductorEmail(String nombre, String email, Pageable pageable);
+
+    @Query("SELECT COUNT(c) FROM Cliente c WHERE c.productor.email = :email AND c.activo = true")
+    Long countActiveClientesByProductorEmail(@Param("email") String email);
 }

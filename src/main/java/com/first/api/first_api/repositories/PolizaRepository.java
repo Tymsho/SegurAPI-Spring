@@ -29,4 +29,38 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
 
     // Busca una póliza por ID asegurando la propiedad de la misma
     Optional<Poliza> findByIdAndProductorEmail(Long id, String email);
+
+    @Query("SELECT COUNT(p) FROM Poliza p WHERE p.productor.email = :email AND p.activo = true")
+    Long countActivePolizasByProductorEmail(@Param("email") String email);
+
+    @Query("SELECT COALESCE(SUM(p.premio), 0.0) FROM Poliza p WHERE p.productor.email = :email AND p.activo = true")
+    Double sumPremioByProductorEmail(@Param("email") String email);
+
+    @Query("SELECT COALESCE(SUM(p.prima), 0.0) FROM Poliza p WHERE p.productor.email = :email AND p.activo = true")
+    Double sumPrimaByProductorEmail(@Param("email") String email);
+
+    @Query("SELECT new com.first.api.first_api.dtoresponse.MesStat(YEAR(p.inicioVigencia), MONTH(p.inicioVigencia), COUNT(p)) " +
+           "FROM Poliza p " +
+           "WHERE p.productor.email = :email AND p.activo = true " +
+           "GROUP BY YEAR(p.inicioVigencia), MONTH(p.inicioVigencia) " +
+           "ORDER BY YEAR(p.inicioVigencia) ASC, MONTH(p.inicioVigencia) ASC")
+    java.util.List<com.first.api.first_api.dtoresponse.MesStat> getPolizasPorMes(@Param("email") String email);
+
+    @Query("SELECT new com.first.api.first_api.dtoresponse.CompaniaStat(p.compania.nombre, COUNT(p)) " +
+           "FROM Poliza p " +
+           "WHERE p.productor.email = :email AND p.activo = true " +
+           "GROUP BY p.compania.nombre")
+    java.util.List<com.first.api.first_api.dtoresponse.CompaniaStat> getPolizasPorCompania(@Param("email") String email);
+
+    @Query("SELECT new com.first.api.first_api.dtoresponse.RamoStat(p.ramo.nombre, COUNT(p)) " +
+           "FROM Poliza p " +
+           "WHERE p.productor.email = :email AND p.activo = true " +
+           "GROUP BY p.ramo.nombre")
+    java.util.List<com.first.api.first_api.dtoresponse.RamoStat> getPolizasPorRamo(@Param("email") String email);
+
+    @Query("SELECT new com.first.api.first_api.dtoresponse.PagoStat(p.tipoPago, COUNT(p)) " +
+           "FROM Poliza p " +
+           "WHERE p.productor.email = :email AND p.activo = true " +
+           "GROUP BY p.tipoPago")
+    java.util.List<com.first.api.first_api.dtoresponse.PagoStat> getPolizasPorTipoPago(@Param("email") String email);
 }
