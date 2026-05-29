@@ -36,6 +36,7 @@ public class SecurityConfig {
                         // 1. Rutas públicas y documentación (Siempre al principio)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/usuarios/registro").permitAll()
+                        .requestMatchers("/api/usuarios/verificar").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",

@@ -28,14 +28,15 @@ public class UsuarioController {
         );
     }
 
-    // Endpoint reservado para que tu compañero 2 arme la lógica de verificación
-    /*
     @PostMapping("/verificar")
     public ResponseEntity<String> verificarCorreo(
             @RequestParam("email") String email, 
             @RequestParam("codigo") String codigo) {
-        // Lógica de validación de código y pase a activo = true
-        return null;
+        try {
+            usuarioService.verificarUsuario(email, codigo);
+            return new ResponseEntity<>("Cuenta verificada exitosamente. Ahora puedes iniciar sesión.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
-    */
 }
