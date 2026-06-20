@@ -11,6 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.first.api.first_api.services.FileStorageService;
 
 @RestController
 @RequestMapping("/api/polizas")
@@ -18,6 +20,9 @@ public class PolizaController {
 
     @Autowired
     private PolizaService polizaService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     @PostMapping
     public ResponseEntity<PolizaResponse> crearPoliza(@Valid @RequestBody PolizaRequest polizaDTO) {
@@ -55,5 +60,13 @@ public class PolizaController {
     public ResponseEntity<Void> anularPoliza(@PathVariable("id") Long id) {
         polizaService.anularPoliza(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/archivo")
+    public ResponseEntity<PolizaResponse> subirDocumentoPoliza(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {
+        String fileName = fileStorageService.guardarArchivo(file);
+        String fileDownloadUri = "/archivos/" + fileName;
+        PolizaResponse actualizada = polizaService.actualizarDocumento(id, fileDownloadUri);
+        return ResponseEntity.ok(actualizada);
     }
 }

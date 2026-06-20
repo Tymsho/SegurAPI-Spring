@@ -23,5 +23,6 @@ public interface PolizaMapper {
     @Mapping(target = "ramo", ignore = true)
     @Mapping(target = "productor", ignore = true)
     @Mapping(target = "activo", ignore = true)
+    @Mapping(target = "documentoUrl", ignore = true)
     Poliza toEntity(PolizaRequest dto);
 }

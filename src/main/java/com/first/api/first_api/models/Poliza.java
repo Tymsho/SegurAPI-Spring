@@ -48,4 +48,7 @@ public class Poliza {
     private Double premio;
 
     private boolean activo = true;
+
+    @Column(name = "documento_url")
+    private String documentoUrl;
 }

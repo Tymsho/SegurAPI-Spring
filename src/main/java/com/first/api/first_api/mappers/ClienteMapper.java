@@ -16,5 +16,6 @@ public interface ClienteMapper {
     @Mapping(target = "localidad", ignore = true)
     @Mapping(target = "productor", ignore = true)
     @Mapping(target = "activo", ignore = true)
+    @Mapping(target = "fotoUrl", ignore = true)
     Cliente toEntity(ClienteRequest dto);
 }

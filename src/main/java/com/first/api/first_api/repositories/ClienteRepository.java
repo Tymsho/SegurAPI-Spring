@@ -15,6 +15,14 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     // Trae solo los clientes del productor logueado
     Page<Cliente> findByProductorEmail(String email, Pageable pageable);
 
+    // Busca un cliente por DNI asegurando que pertenezca a la cartera del productor logueado
+    Optional<Cliente> findByDniAndProductorEmail(String dni, String email);
+
+    @Query("SELECT new com.first.api.first_api.dtoresponse.ClienteLightResponse(c.id, CONCAT(c.nombre, ' ', c.apellido), c.dni) " +
+           "FROM Cliente c WHERE c.productor.email = :email AND c.activo = true " +
+           "AND (LOWER(c.nombre) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(c.apellido) LIKE LOWER(CONCAT('%', :query, '%')) OR c.dni LIKE CONCAT('%', :query, '%'))")
+    java.util.List<com.first.api.first_api.dtoresponse.ClienteLightResponse> searchClientesLight(@Param("email") String email, @Param("query") String query, Pageable pageable);
+
     // Busca un cliente específico garantizando que le pertenezca al productor
     Optional<Cliente> findByIdAndProductorEmail(Long id, String email);
 

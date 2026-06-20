@@ -122,4 +122,14 @@ public class PolizaService {
         Poliza polizaActualizada = polizaRepository.save(polizaExistente);
         return polizaMapper.toResponse(polizaActualizada);
     }
+
+    @Transactional
+    public PolizaResponse actualizarDocumento(Long id, String documentoUrl) {
+        String email = getEmailLogueado();
+        Poliza poliza = polizaRepository.findByIdAndProductorEmail(id, email)
+                .orElseThrow(() -> new ResourceNotFoundException("Póliza no encontrada o acceso denegado"));
+        poliza.setDocumentoUrl(documentoUrl);
+        poliza = polizaRepository.save(poliza);
+        return polizaMapper.toResponse(poliza);
+    }
 }

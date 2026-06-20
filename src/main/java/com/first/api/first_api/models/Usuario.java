@@ -30,4 +30,7 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;
+
+    @Column(name = "plan_suscripcion")
+    private String plan = "BASICO";
 }

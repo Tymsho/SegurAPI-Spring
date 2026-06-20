@@ -47,4 +47,7 @@ public class Cliente {
     private Usuario productor; // Clave para el aislamiento de cartera (Multi-tenant)
 
     private boolean activo = true;
+
+    @Column(name = "foto_url")
+    private String fotoUrl;
 }

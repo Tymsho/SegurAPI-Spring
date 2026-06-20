@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
+                        .requestMatchers("/api/pagos/webhook").permitAll()
 
                         // 2. Gestión de Usuarios: Exclusivo para el Administrador
                         // Esto impide que un productor liste, modifique o penalice a otros usuarios

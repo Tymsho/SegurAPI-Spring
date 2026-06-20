@@ -58,6 +58,11 @@ public class ClienteService {
         return clientes.map(clienteMapper::toResponse);
     }
 
+    public java.util.List<com.first.api.first_api.dtoresponse.ClienteLightResponse> buscarClientesLight(String query) {
+        String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
+        return clienteRepository.searchClientesLight(emailLogueado, query, org.springframework.data.domain.PageRequest.of(0, 10));
+    }
+
     // Buscar por ID
     public Optional<ClienteResponse> buscarPorId(Long id) {
         return clienteRepository.findById(id)
@@ -107,6 +112,15 @@ public class ClienteService {
         } else {
             throw new ResourceNotFoundException("Cliente no encontrado con id: " + id);
         }
+    }
+
+    @Transactional
+    public ClienteResponse actualizarFoto(Long id, String fotoUrl) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + id));
+        cliente.setFotoUrl(fotoUrl);
+        cliente = clienteRepository.save(cliente);
+        return clienteMapper.toResponse(cliente);
     }
 
     @Transactional

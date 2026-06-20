@@ -20,4 +20,5 @@ public class PolizaResponse {
     private String tipoFacturacion;
     private Double prima;
     private Double premio;
+    private String documentoUrl;
 }
