@@ -37,6 +37,9 @@ public class ClienteService {
     @Autowired
     private ClienteMapper clienteMapper;
 
+    @Autowired
+    private NotificacionService notificacionService;
+
     // --- MÉTODOS DEL SERVICIO (Devuelven DTOs) ---
 
     // Obtener solo clientes activos
@@ -97,6 +100,13 @@ public class ClienteService {
 
         Cliente guardado = clienteRepository.save(cliente);
 
+        // Disparar Notificación en tiempo real
+        notificacionService.enviarNotificacion(
+            productor.getId(),
+            "Nuevo Cliente Registrado",
+            "Se ha agregado a " + guardado.getNombre() + " " + guardado.getApellido() + " a tu cartera."
+        );
+
         // Retornar tu DTO mapeado
         return clienteMapper.toResponse(guardado);
     }
@@ -109,6 +119,16 @@ public class ClienteService {
             Cliente cliente = clienteOpt.get();
             cliente.setActivo(false);
             clienteRepository.save(cliente);
+            
+            String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
+            Usuario productor = usuarioRepository.findByEmail(emailLogueado).orElse(null);
+            if (productor != null) {
+                notificacionService.enviarNotificacion(
+                    productor.getId(),
+                    "Cliente Dado de Baja",
+                    "Se ha dado de baja al cliente " + cliente.getNombre() + " " + cliente.getApellido() + "."
+                );
+            }
         } else {
             throw new ResourceNotFoundException("Cliente no encontrado con id: " + id);
         }
@@ -142,6 +162,17 @@ public class ClienteService {
         }
 
         Cliente clienteActualizado = clienteRepository.save(clienteExistente);
+        
+        String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario productor = usuarioRepository.findByEmail(emailLogueado).orElse(null);
+        if (productor != null) {
+            notificacionService.enviarNotificacion(
+                productor.getId(),
+                "Cliente Actualizado",
+                "Se han modificado los datos de " + clienteActualizado.getNombre() + " " + clienteActualizado.getApellido() + "."
+            );
+        }
+        
         return clienteMapper.toResponse(clienteActualizado);
     }
 }

@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
                         .requestMatchers("/api/pagos/webhook").permitAll()
+                        .requestMatchers("/ws/**").permitAll() // Permitir Handshake de WebSockets
 
                         // 2. Gestión de Usuarios: Exclusivo para el Administrador
                         // Esto impide que un productor liste, modifique o penalice a otros usuarios
@@ -59,6 +60,9 @@ public class SecurityConfig {
                         // Permitimos que el productor tenga control total (Lectura, Creación y Edición)
                         // sobre su cartera
                         .requestMatchers("/api/clientes/**", "/api/polizas/**").hasAnyRole("PRODUCTOR", "ADMIN")
+                        
+                        // Localidades (Público para selectores)
+                        .requestMatchers("/api/localidades/**").permitAll()
 
                         // 4. Cualquier otra petición no especificada requiere autenticación
                         .anyRequest().authenticated());
