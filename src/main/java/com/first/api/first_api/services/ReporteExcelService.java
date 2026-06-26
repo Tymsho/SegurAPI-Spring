@@ -37,7 +37,7 @@ public class ReporteExcelService {
             headerStyle.setFont(headerFont);
 
             for (Cliente cliente : clientes) {
-                String sheetName = (cliente.getNombre() + " " + cliente.getApellido()).replaceAll("[^a-zA-Z0-9]", " ");
+                String sheetName = (cliente.getNombre() + " " + cliente.getApellido() + " " + cliente.getId()).replaceAll("[^a-zA-Z0-9 ]", " ").trim();
                 if (sheetName.length() > 30) sheetName = sheetName.substring(0, 30);
                 
                 Sheet sheet = workbook.createSheet(sheetName);

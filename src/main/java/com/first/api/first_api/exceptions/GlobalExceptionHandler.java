@@ -32,4 +32,20 @@ public class GlobalExceptionHandler {
         
         return new ResponseEntity<>(errores, HttpStatus.BAD_REQUEST); // Devuelve 400
     }
+
+    // Maneja RuntimeExceptions (como cuando el DNI ya existe)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("message", ex.getMessage());
+        return new ResponseEntity<>(respuesta, HttpStatus.BAD_REQUEST);
+    }
+    
+    // Maneja errores de formato (como un string vacío donde se espera un número)
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("message", "Error en el formato de los datos enviados. Verifique que los campos numéricos o fechas sean válidos.");
+        return new ResponseEntity<>(respuesta, HttpStatus.BAD_REQUEST);
+    }
 }
