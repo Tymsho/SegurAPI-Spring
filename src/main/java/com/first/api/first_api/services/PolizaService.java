@@ -90,8 +90,8 @@ public class PolizaService {
                 .map(polizaMapper::toResponse);
     }
 
-    public Page<PolizaResponse> obtenerMisPolizasActivas(Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
-        return polizaRepository.findMisPolizasFiltradas(getEmailLogueado(), clienteId, companiaId, ramoId, pageable)
+    public Page<PolizaResponse> obtenerMisPolizasActivas(String nroPza, Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
+        return polizaRepository.findMisPolizasFiltradas(getEmailLogueado(), nroPza, clienteId, companiaId, ramoId, pageable)
                 .map(polizaMapper::toResponse);
     }
 

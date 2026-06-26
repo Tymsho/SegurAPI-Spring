@@ -51,7 +51,7 @@ public class ReporteExcelService {
                     cell.setCellStyle(headerStyle);
                 }
 
-                List<Poliza> polizas = polizaRepository.findMisPolizasFiltradas(emailLogueado, cliente.getId(), null, null, Pageable.unpaged()).getContent();
+                List<Poliza> polizas = polizaRepository.findMisPolizasFiltradas(emailLogueado, null, cliente.getId(), null, null, Pageable.unpaged()).getContent();
                 
                 int rowIdx = 1;
                 for (Poliza poliza : polizas) {

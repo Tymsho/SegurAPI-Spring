@@ -153,6 +153,12 @@ public class ClienteService {
         clienteExistente.setDni(detallesDTO.getDni());
         clienteExistente.setTelefono(detallesDTO.getTelefono());
         clienteExistente.setEmail(detallesDTO.getEmail());
+        
+        // Agregar campos faltantes
+        clienteExistente.setFechaNacimiento(detallesDTO.getFechaNacimiento());
+        clienteExistente.setDireccion(detallesDTO.getDireccion());
+        clienteExistente.setSexo(detallesDTO.getSexo());
+        clienteExistente.setTipoIva(detallesDTO.getTipoIva());
 
         // Si cambia localidad
         if (detallesDTO.getLocalidadId() != null) {

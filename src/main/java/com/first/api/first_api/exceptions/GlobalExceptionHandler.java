@@ -30,6 +30,10 @@ public class GlobalExceptionHandler {
             errores.put(error.getField(), error.getDefaultMessage())
         );
         
+        // Agrega un mensaje general para el frontend
+        String mensajeGeneral = "Errores de validación: " + String.join(", ", errores.values());
+        errores.put("message", mensajeGeneral);
+        
         return new ResponseEntity<>(errores, HttpStatus.BAD_REQUEST); // Devuelve 400
     }
 

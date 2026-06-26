@@ -14,12 +14,14 @@ import java.util.Optional;
 public interface PolizaRepository extends JpaRepository<Poliza, Long> {
     
     @EntityGraph(attributePaths = {"tomador", "compania", "ramo", "productor"})
-    @Query("SELECT p FROM Poliza p WHERE p.productor.email = :email " +
+    @Query("SELECT p FROM Poliza p WHERE p.productor.email = :email AND p.activo = true " +
+           "AND (:nroPza IS NULL OR LOWER(p.nroPza) LIKE LOWER(CONCAT('%', :nroPza, '%'))) " +
            "AND (:clienteId IS NULL OR p.tomador.id = :clienteId) " +
            "AND (:companiaId IS NULL OR p.compania.id = :companiaId) " +
            "AND (:ramoId IS NULL OR p.ramo.id = :ramoId)")
     Page<Poliza> findMisPolizasFiltradas(
         @Param("email") String email,
+        @Param("nroPza") String nroPza,
         @Param("clienteId") Long clienteId,
         @Param("companiaId") Long companiaId,
         @Param("ramoId") Long ramoId,

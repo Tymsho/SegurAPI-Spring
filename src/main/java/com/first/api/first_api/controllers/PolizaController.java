@@ -32,12 +32,13 @@ public class PolizaController {
 
     @GetMapping
     public ResponseEntity<Page<PolizaResponse>> obtenerMisPolizas(
+            @RequestParam(required = false) String nroPza,
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) Long companiaId,
             @RequestParam(required = false) Long ramoId,
             @PageableDefault(size = 10) Pageable pageable) {
         
-        Page<PolizaResponse> polizas = polizaService.obtenerMisPolizasActivas(clienteId, companiaId, ramoId, pageable);
+        Page<PolizaResponse> polizas = polizaService.obtenerMisPolizasActivas(nroPza, clienteId, companiaId, ramoId, pageable);
         return ResponseEntity.ok(polizas);
     }
 
