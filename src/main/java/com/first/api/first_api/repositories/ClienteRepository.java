@@ -2,6 +2,7 @@ package com.first.api.first_api.repositories;
 
 import com.first.api.first_api.models.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     
     // Trae solo los clientes del productor logueado
+    @EntityGraph(attributePaths = {"localidad", "productor"})
     Page<Cliente> findByProductorEmail(String email, Pageable pageable);
 
     // Busca un cliente por DNI asegurando que pertenezca a la cartera del productor logueado
@@ -30,9 +32,11 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     boolean existsByDniAndProductorEmail(String dni, String email);
 
     // Trae los clientes activos de ESE productor
+    @EntityGraph(attributePaths = {"localidad", "productor"})
     Page<Cliente> findByActivoTrueAndProductorEmail(String email, Pageable pageable);
 
     // Trae los clientes activos de ESE productor, filtrando por una coincidencia en el nombre
+    @EntityGraph(attributePaths = {"localidad", "productor"})
     Page<Cliente> findByNombreContainingIgnoreCaseAndActivoTrueAndProductorEmail(String nombre, String email, Pageable pageable);
 
     @Query("SELECT COUNT(c) FROM Cliente c WHERE c.productor.email = :email AND c.activo = true")

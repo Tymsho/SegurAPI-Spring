@@ -33,12 +33,23 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errores, HttpStatus.BAD_REQUEST); // Devuelve 400
     }
 
-    // Maneja RuntimeExceptions (como cuando el DNI ya existe)
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+    // Maneja IllegalArgumentException para validaciones de negocio o seguridad
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
         Map<String, String> respuesta = new HashMap<>();
         respuesta.put("message", ex.getMessage());
         return new ResponseEntity<>(respuesta, HttpStatus.BAD_REQUEST);
+    }
+
+    // Maneja RuntimeExceptions genéricas o internas del servidor
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("error", "Error interno del servidor. Por favor, intente más tarde.");
+        // Log the actual error for debugging
+        System.err.println("Runtime Error: " + ex.getMessage());
+        ex.printStackTrace();
+        return new ResponseEntity<>(respuesta, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
     // Maneja errores de formato (como un string vacío donde se espera un número)

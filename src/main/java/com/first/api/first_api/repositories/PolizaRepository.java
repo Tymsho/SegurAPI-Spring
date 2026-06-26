@@ -2,6 +2,7 @@ package com.first.api.first_api.repositories;
 
 import com.first.api.first_api.models.Poliza;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface PolizaRepository extends JpaRepository<Poliza, Long> {
     
+    @EntityGraph(attributePaths = {"tomador", "compania", "ramo", "productor"})
     @Query("SELECT p FROM Poliza p WHERE p.productor.email = :email " +
            "AND (:clienteId IS NULL OR p.tomador.id = :clienteId) " +
            "AND (:companiaId IS NULL OR p.compania.id = :companiaId) " +

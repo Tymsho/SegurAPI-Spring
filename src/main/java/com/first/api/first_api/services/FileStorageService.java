@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,9 +35,18 @@ public class FileStorageService {
         }
         
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        
+        // Validación de extensión segura
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        List<String> allowedExtensions = Arrays.asList("pdf", "jpg", "jpeg", "png");
+        
+        if (!allowedExtensions.contains(fileExtension)) {
+            throw new IllegalArgumentException("Tipo de archivo no permitido. Solo se permiten: " + allowedExtensions);
+        }
+
         try {
             if (fileName.contains("..")) {
-                throw new RuntimeException("El archivo contiene una secuencia de ruta inválida " + fileName);
+                throw new IllegalArgumentException("El archivo contiene una secuencia de ruta inválida " + fileName);
             }
             // Generar nombre unico
             String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
