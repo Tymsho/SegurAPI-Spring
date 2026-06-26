@@ -38,3 +38,6 @@ postman/
 
 ### ApiTest ###
 api-test.http
+
+### Entorno ###
+.env

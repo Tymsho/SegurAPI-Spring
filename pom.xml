@@ -111,6 +111,7 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Manejo de variables de entorno nativo de Spring Boot 2.4+ -->
 		<!-- Nuevas dependencias -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

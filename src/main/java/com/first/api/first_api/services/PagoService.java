@@ -33,6 +33,12 @@ public class PagoService {
     }
 
     public String crearPreferenciaPremium() {
+        if ("TEST-TU-TOKEN-AQUI".equals(mpAccessToken) || mpAccessToken == null) {
+            // Si el usuario aún no configuró su token real, devolvemos un link simulado
+            // para que el frontend no se rompa y el flujo siga funcionando visualmente.
+            return "https://www.mercadopago.com.ar/developers/es/docs";
+        }
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         
         try {
@@ -55,8 +61,12 @@ public class PagoService {
             Preference preference = client.create(preferenceRequest);
 
             return preference.getInitPoint(); // URL para redirigir al usuario
-        } catch (MPException | MPApiException e) {
-            throw new RuntimeException("Error al crear la preferencia de pago en MercadoPago", e);
+        } catch (MPApiException apiException) {
+            System.err.println("MERCADOPAGO API ERROR DETAIL: " + apiException.getApiResponse().getContent());
+            throw new RuntimeException("Error al crear la preferencia de pago en MercadoPago", apiException);
+        } catch (MPException e) {
+            System.err.println("MERCADOPAGO SDK ERROR: " + e.getMessage());
+            throw new RuntimeException("Error interno de MercadoPago", e);
         }
     }
 
