@@ -8,7 +8,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @Component
 @SuppressWarnings("null")
@@ -63,7 +68,7 @@ public class DataSeeder implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setNombre("Administrador Global");
             admin.setRol(Rol.ADMIN);
-            admin.setActivo(true); // Forzamos true para poder loguearnos en las pruebas
+            admin.setActivo(true);
 
             Usuario productor = new Usuario();
             productor.setEmail("productor@seguros.com");
@@ -77,142 +82,122 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void cargarDatosComerciales() {
-        if (companiaRepository.count() == 0) {
-            Compania c1 = new Compania();
-            c1.setNombre("Federación Patronal");
-            Compania c2 = new Compania();
-            c2.setNombre("Mapfre");
-            companiaRepository.saveAll(List.of(c1, c2));
+        List<String> nombresCompanias = Arrays.asList(
+            "Federación Patronal Seguros", "Sancor Seguros", "La Caja de Ahorro y Seguro",
+            "Seguros Rivadavia", "San Cristóbal Seguros", "Mercantil Andina", "La Segunda",
+            "Zurich Argentina", "Allianz Argentina", "Mapfre Argentina", "La Holando Sudamericana",
+            "Provincia Seguros", "Nación Seguros", "Libra Seguros", "El Norte Seguros",
+            "La Perseverancia Seguros", "Cooperación Seguros", "MetLife Seguros", "SMG LIFE",
+            "Galeno Life", "Prudential Seguros", "Zurich International Life", "La Estrella",
+            "Orígenes Seguros", "Binaria Seguros de Vida", "Prevención ART", "Asociart ART",
+            "Provincia ART", "Galeno ART", "Experta ART", "Swiss Medical ART", "La Segunda ART",
+            "Aseguradores de Cauciones", "Afianzadora Latinoamericana", "Crédito y Caución", "Insur"
+        );
+
+        List<String> existentesCompanias = companiaRepository.findAll().stream().map(Compania::getNombre).collect(Collectors.toList());
+        for (String nombre : nombresCompanias) {
+            if (!existentesCompanias.contains(nombre) && !existentesCompanias.contains(nombre.replace(" Seguros", ""))) {
+                Compania c = new Compania();
+                c.setNombre(nombre);
+                companiaRepository.save(c);
+            }
         }
 
-        if (ramoRepository.count() == 0) {
-            Ramo r1 = new Ramo();
-            r1.setNombre("Automotor");
-            Ramo r2 = new Ramo();
-            r2.setNombre("Combinado Familiar");
-            ramoRepository.saveAll(List.of(r1, r2));
+        List<String> nombresRamos = Arrays.asList(
+            "Automotores", "Motovehículos", "Combinado Familiar", "Integral de Comercio / Consorcio",
+            "Incendio", "Transporte (Cascos y Carga)", "Caución", "Responsabilidad Civil",
+            "Riesgos Agrícolas / Granizo", "Técnico", "Crédito", "Vida Individual",
+            "Vida Colectivo", "Vida Obligatorio", "Accidentes Personales (AP)", "Retiro",
+            "Sepelio", "Riesgos del Trabajo (ART)"
+        );
+
+        List<String> existentesRamos = ramoRepository.findAll().stream().map(Ramo::getNombre).collect(Collectors.toList());
+        for (String nombre : nombresRamos) {
+            if (!existentesRamos.contains(nombre) && !existentesRamos.contains(nombre.replace("Automotores", "Automotor"))) {
+                Ramo r = new Ramo();
+                r.setNombre(nombre);
+                ramoRepository.save(r);
+            }
         }
     }
 
     private void cargarClientesYPolizas() {
         Usuario productor = usuarioRepository.findByEmail("productor@seguros.com").orElse(null);
-        if (productor != null) {
-            Localidad localidad = localidadRepository.findAll().stream().findFirst().orElse(null);
+        if (productor == null) return;
 
-            // Buscamos o creamos los clientes de prueba según su DNI para no duplicarlos
-            Cliente c1 = clienteRepository.findAll().stream()
-                    .filter(c -> "12345678".equals(c.getDni()))
+        Localidad localidad = localidadRepository.findAll().stream().findFirst().orElse(null);
+
+        String[] nombres = {"Juan", "Maria", "Carlos", "Lucia", "Jorge", "Ana", "Pedro", "Marta", "Diego", "Sofia"};
+        String[] apellidos = {"Perez", "Gomez", "Rodriguez", "Fernandez", "Lopez", "Martinez", "Gonzalez", "Romero", "Sosa", "Diaz"};
+        
+        List<Cliente> clientesActivos = new ArrayList<>();
+        
+        // Ensure at least 10 clients exist
+        for (int i = 0; i < 10; i++) {
+            final int index = i;
+            String dni = "1000000" + index;
+            Cliente c = clienteRepository.findAll().stream()
+                    .filter(cl -> dni.equals(cl.getDni()))
                     .findFirst()
                     .orElseGet(() -> {
-                        Cliente c = new Cliente();
-                        c.setNombre("Juan");
-                        c.setApellido("Perez");
-                        c.setFechaNacimiento(java.time.LocalDate.of(1985, 5, 15));
-                        c.setDireccion("Avenida Alem 123");
-                        c.setLocalidad(localidad);
-                        c.setTelefono("2914567890");
-                        c.setEmail("juan.perez@example.com");
-                        c.setDni("12345678");
-                        c.setSexo(Sexo.MASCULINO);
-                        c.setTipoIva(TipoIva.CONSUMIDOR_FINAL);
-                        c.setProductor(productor);
-                        c.setActivo(true);
-                        return clienteRepository.save(c);
+                        Cliente nuevo = new Cliente();
+                        nuevo.setNombre(nombres[index]);
+                        nuevo.setApellido(apellidos[index]);
+                        nuevo.setFechaNacimiento(LocalDate.of(1970 + index * 2, (index % 12) + 1, (index % 28) + 1));
+                        nuevo.setDireccion("Calle Falsa " + (123 + index * 10));
+                        nuevo.setLocalidad(localidad);
+                        nuevo.setTelefono("291555" + index + index + index + index);
+                        nuevo.setEmail(nombres[index].toLowerCase() + "." + apellidos[index].toLowerCase() + "@example.com");
+                        nuevo.setDni(dni);
+                        nuevo.setSexo(index % 2 == 0 ? Sexo.MASCULINO : Sexo.FEMENINO);
+                        nuevo.setTipoIva(TipoIva.CONSUMIDOR_FINAL);
+                        nuevo.setProductor(productor);
+                        nuevo.setActivo(true);
+                        return clienteRepository.save(nuevo);
                     });
+            clientesActivos.add(c);
+        }
 
-            Cliente c2 = clienteRepository.findAll().stream()
-                    .filter(c -> "87654321".equals(c.getDni()))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        Cliente c = new Cliente();
-                        c.setNombre("Maria");
-                        c.setApellido("Gomez");
-                        c.setFechaNacimiento(java.time.LocalDate.of(1990, 8, 22));
-                        c.setDireccion("San Martin 456");
-                        c.setLocalidad(localidad);
-                        c.setTelefono("2910987654");
-                        c.setEmail("maria.gomez@example.com");
-                        c.setDni("87654321");
-                        c.setSexo(Sexo.FEMENINO);
-                        c.setTipoIva(TipoIva.MONOTRIBUTISTA);
-                        c.setProductor(productor);
-                        c.setActivo(true);
-                        return clienteRepository.save(c);
-                    });
+        // Generate a realistic portfolio if policies count is low (less than 10)
+        if (polizaRepository.count() < 10) {
+            List<Compania> companias = companiaRepository.findAll();
+            List<Ramo> ramos = ramoRepository.findAll();
+            Random rand = new Random();
 
-            Cliente c3 = clienteRepository.findAll().stream()
-                    .filter(c -> "11223344".equals(c.getDni()))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        Cliente c = new Cliente();
-                        c.setNombre("Carlos");
-                        c.setApellido("Rodriguez");
-                        c.setFechaNacimiento(java.time.LocalDate.of(1978, 12, 5));
-                        c.setDireccion("O'Higgins 789");
-                        c.setLocalidad(localidad);
-                        c.setTelefono("2915554433");
-                        c.setEmail("carlos.rodriguez@example.com");
-                        c.setDni("11223344");
-                        c.setSexo(Sexo.MASCULINO);
-                        c.setTipoIva(TipoIva.RESPONSABLE_INSCRIPTO);
-                        c.setProductor(productor);
-                        c.setActivo(true);
-                        return clienteRepository.save(c);
-                    });
-
-            if (polizaRepository.count() == 0) {
-                List<Compania> companias = companiaRepository.findAll();
-                List<Ramo> ramos = ramoRepository.findAll();
+            for (int i = 0; i < 35; i++) {
+                Cliente cliente = clientesActivos.get(rand.nextInt(clientesActivos.size()));
+                Compania compania = companias.get(rand.nextInt(companias.size()));
+                Ramo ramo = ramos.get(rand.nextInt(ramos.size()));
                 
-                Compania comp1 = companias.isEmpty() ? null : companias.get(0);
-                Compania comp2 = companias.size() > 1 ? companias.get(1) : comp1;
+                // Random issue date within the last 12 months
+                int daysAgo = rand.nextInt(365);
+                LocalDate inicio = LocalDate.now().minusDays(daysAgo);
                 
-                Ramo ramoAutomotor = ramos.stream().filter(r -> r.getNombre().equalsIgnoreCase("Automotor")).findFirst().orElse(ramos.isEmpty() ? null : ramos.get(0));
-                Ramo ramoHogar = ramos.stream().filter(r -> r.getNombre().equalsIgnoreCase("Combinado Familiar")).findFirst().orElse(ramos.size() > 1 ? ramos.get(1) : ramoAutomotor);
-
-                Poliza p1 = new Poliza();
-                p1.setNroPza("POL-AUTO-001");
-                p1.setTomador(c1);
-                p1.setTipoPago(TipoPago.TARJETA_CREDITO);
-                p1.setProductor(productor);
-                p1.setInicioVigencia(java.time.LocalDate.now().minusMonths(3));
-                p1.setFinVigencia(java.time.LocalDate.now().plusMonths(9));
-                p1.setRamo(ramoAutomotor);
-                p1.setCompania(comp1);
-                p1.setTipoFacturacion("Mensual");
-                p1.setPrima(15000.0);
-                p1.setPremio(18000.0);
-                p1.setActivo(true);
-
-                Poliza p2 = new Poliza();
-                p2.setNroPza("POL-HOGAR-002");
-                p2.setTomador(c2);
-                p2.setTipoPago(TipoPago.EFECTIVO);
-                p2.setProductor(productor);
-                p2.setInicioVigencia(java.time.LocalDate.now().minusMonths(1));
-                p2.setFinVigencia(java.time.LocalDate.now().plusMonths(11));
-                p2.setRamo(ramoHogar);
-                p2.setCompania(comp2);
-                p2.setTipoFacturacion("Mensual");
-                p2.setPrima(8000.0);
-                p2.setPremio(9500.0);
-                p2.setActivo(true);
-
-                Poliza p3 = new Poliza();
-                p3.setNroPza("POL-AUTO-003");
-                p3.setTomador(c3);
-                p3.setTipoPago(TipoPago.TARJETA_DEBITO);
-                p3.setProductor(productor);
-                p3.setInicioVigencia(java.time.LocalDate.now().minusDays(15));
-                p3.setFinVigencia(java.time.LocalDate.now().plusDays(350));
-                p3.setRamo(ramoAutomotor);
-                p3.setCompania(comp1);
-                p3.setTipoFacturacion("Semestral");
-                p3.setPrima(20000.0);
-                p3.setPremio(24000.0);
-                p3.setActivo(true);
-
-                polizaRepository.saveAll(List.of(p1, p2, p3));
+                // 1 year term usually
+                LocalDate fin = inicio.plusYears(1);
+                
+                // Random prime between 5000 and 150000
+                double prima = 5000 + (rand.nextDouble() * 145000);
+                double premio = prima * 1.21; // add VAT roughly
+                
+                TipoPago[] pagos = TipoPago.values();
+                TipoPago pago = pagos[rand.nextInt(pagos.length)];
+                
+                Poliza p = new Poliza();
+                p.setNroPza("POL-" + ramo.getNombre().substring(0, 3).toUpperCase() + "-" + (1000 + i));
+                p.setTomador(cliente);
+                p.setTipoPago(pago);
+                p.setProductor(productor);
+                p.setInicioVigencia(inicio);
+                p.setFinVigencia(fin);
+                p.setRamo(ramo);
+                p.setCompania(compania);
+                p.setTipoFacturacion(rand.nextBoolean() ? "Mensual" : "Anual");
+                p.setPrima(Math.round(prima * 100.0) / 100.0);
+                p.setPremio(Math.round(premio * 100.0) / 100.0);
+                p.setActivo(true);
+                
+                polizaRepository.save(p);
             }
         }
     }
