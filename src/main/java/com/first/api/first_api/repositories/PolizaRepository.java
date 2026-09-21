@@ -15,7 +15,7 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
     
     @EntityGraph(attributePaths = {"tomador", "compania", "ramo", "productor"})
     @Query("SELECT p FROM Poliza p WHERE p.productor.email = :email AND p.activo = true " +
-           "AND (:nroPza IS NULL OR LOWER(p.nroPza) LIKE LOWER(CONCAT('%', :nroPza, '%'))) " +
+           "AND (:nroPza IS NULL OR LOWER(p.nroPza) LIKE LOWER(CONCAT('%', CAST(:nroPza AS string), '%'))) " +
            "AND (:clienteId IS NULL OR p.tomador.id = :clienteId) " +
            "AND (:companiaId IS NULL OR p.compania.id = :companiaId) " +
            "AND (:ramoId IS NULL OR p.ramo.id = :ramoId)")
