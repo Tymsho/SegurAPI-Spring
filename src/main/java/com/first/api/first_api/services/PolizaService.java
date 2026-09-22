@@ -26,7 +26,6 @@ public class PolizaService {
     @Autowired private RamoRepository ramoRepository;
     @Autowired private CompaniaRepository companiaRepository;
     @Autowired private PolizaMapper polizaMapper;
-    @Autowired private NotificacionService notificacionService;
 
     // --- UTILIDAD: Obtener el Productor Logueado ---
     private String getEmailLogueado() {
@@ -74,13 +73,6 @@ public class PolizaService {
         
         Poliza guardada = polizaRepository.save(poliza);
         
-        // Disparar Notificación en tiempo real
-        notificacionService.enviarNotificacion(
-            productor.getId(),
-            "Nueva Póliza",
-            "Se ha registrado la póliza " + guardada.getNroPza() + " exitosamente."
-        );
-        
         return polizaMapper.toResponse(guardada);
     }
 
@@ -103,13 +95,6 @@ public class PolizaService {
         
         poliza.setActivo(false);
         polizaRepository.save(poliza);
-        
-        Usuario productor = getProductorLogueado();
-        notificacionService.enviarNotificacion(
-            productor.getId(),
-            "Póliza Anulada",
-            "La póliza " + poliza.getNroPza() + " ha sido anulada."
-        );
     }
 
     @Transactional
@@ -136,13 +121,6 @@ public class PolizaService {
         polizaExistente.setRamo(actualizacion.getRamo());
 
         Poliza polizaActualizada = polizaRepository.save(polizaExistente);
-        
-        Usuario productor = getProductorLogueado();
-        notificacionService.enviarNotificacion(
-            productor.getId(),
-            "Póliza Actualizada",
-            "Se han modificado los datos de la póliza " + polizaActualizada.getNroPza() + "."
-        );
         
         return polizaMapper.toResponse(polizaActualizada);
     }

@@ -67,4 +67,7 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
            "WHERE p.productor.email = :email AND p.activo = true " +
            "GROUP BY p.tipoPago")
     java.util.List<com.first.api.first_api.dtoresponse.PagoStat> getPolizasPorTipoPago(@Param("email") String email);
+
+    @Query("SELECT p FROM Poliza p WHERE p.activo = true AND p.finVigencia = :targetDate")
+    java.util.List<Poliza> findPolizasVenciendoEn(@Param("targetDate") java.time.LocalDate targetDate);
 }
