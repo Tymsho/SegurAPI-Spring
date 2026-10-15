@@ -13,4 +13,7 @@ public class DashboardStatsResponse {
     private List<CompaniaStat> polizasPorCompania;
     private List<RamoStat> polizasPorRamo;
     private List<PagoStat> polizasPorTipoPago;
+
+    public DashboardStatsResponse() {
+    }
 }

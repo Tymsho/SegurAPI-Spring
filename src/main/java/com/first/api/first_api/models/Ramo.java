@@ -15,4 +15,7 @@ public class Ramo {
     private String nombre; // Ej: Automotor, Vida, Hogar
 
     private boolean activo = true;
+
+    public Ramo() {
+    }
 }

@@ -9,11 +9,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReporteExcelService {
@@ -24,10 +28,16 @@ public class ReporteExcelService {
     @Autowired
     private PolizaRepository polizaRepository;
 
+    @Transactional(readOnly = true)
     public byte[] generarExcelPolizasPorCliente() {
         String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
         
         List<Cliente> clientes = clienteRepository.findByActivoTrueAndProductorEmail(emailLogueado, Pageable.unpaged()).getContent();
+
+        List<Poliza> todasLasPolizas = polizaRepository.findByProductorEmailAndActivoTrue(emailLogueado);
+        Map<Long, List<Poliza>> polizasPorCliente = todasLasPolizas.stream()
+                .filter(p -> p.getTomador() != null && p.getTomador().getId() != null)
+                .collect(Collectors.groupingBy(p -> p.getTomador().getId()));
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             
@@ -51,7 +61,7 @@ public class ReporteExcelService {
                     cell.setCellStyle(headerStyle);
                 }
 
-                List<Poliza> polizas = polizaRepository.findMisPolizasFiltradas(emailLogueado, null, cliente.getId(), null, null, Pageable.unpaged()).getContent();
+                List<Poliza> polizas = polizasPorCliente.getOrDefault(cliente.getId(), Collections.emptyList());
                 
                 int rowIdx = 1;
                 for (Poliza poliza : polizas) {

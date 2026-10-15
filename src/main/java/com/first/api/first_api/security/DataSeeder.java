@@ -14,8 +14,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Component
+@ConditionalOnProperty(name = "app.seeder.enabled", havingValue = "true", matchIfMissing = false)
 @SuppressWarnings("null")
 public class DataSeeder implements CommandLineRunner {
 

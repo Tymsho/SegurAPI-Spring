@@ -1,6 +1,9 @@
 package com.first.api.first_api.services;
 
 import com.first.api.first_api.dtorequest.UsuarioRequest;
+import com.first.api.first_api.exceptions.BusinessRuleException;
+import com.first.api.first_api.exceptions.DuplicateResourceException;
+import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.models.Rol;
 import com.first.api.first_api.models.Usuario;
 import com.first.api.first_api.repositories.UsuarioRepository;
@@ -26,6 +29,10 @@ public class UsuarioService {
 
     @Transactional
     public Usuario registrarUsuario(UsuarioRequest dto) {
+        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new DuplicateResourceException("El email ya se encuentra registrado");
+        }
+
         Usuario nuevo = new Usuario();
         nuevo.setNombre(dto.getNombre());
         nuevo.setEmail(dto.getEmail());
@@ -53,18 +60,18 @@ public class UsuarioService {
     @Transactional
     public void verificarUsuario(String email, String codigo) {
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("El usuario con email " + email + " no existe."));
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario con email " + email + " no existe."));
 
         if (usuario.isActivo()) {
-            throw new RuntimeException("La cuenta ya se encuentra activa.");
+            throw new BusinessRuleException("La cuenta ya se encuentra activa.");
         }
 
         if (usuario.getCodigoVerificacion() == null || !usuario.getCodigoVerificacion().equals(codigo)) {
-            throw new RuntimeException("Código de verificación incorrecto.");
+            throw new BusinessRuleException("Código de verificación incorrecto.");
         }
 
         if (usuario.getCodigoVencimiento() == null || usuario.getCodigoVencimiento().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("El código de verificación ha expirado.");
+            throw new BusinessRuleException("El código de verificación ha expirado.");
         }
 
         // Activar la cuenta y limpiar los campos temporales de verificación

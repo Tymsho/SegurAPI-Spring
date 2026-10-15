@@ -13,4 +13,7 @@ public class Provincia {
 
     @Column(nullable = false, unique = true)
     private String nombre;
+
+    public Provincia() {
+    }
 }

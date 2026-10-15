@@ -8,6 +8,7 @@ import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.preference.Preference;
 import com.first.api.first_api.repositories.UsuarioRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 
 @Service
+@Slf4j
 public class PagoService {
 
     @Value("${mp.access.token}")
@@ -62,10 +64,10 @@ public class PagoService {
 
             return preference.getInitPoint(); // URL para redirigir al usuario
         } catch (MPApiException apiException) {
-            System.err.println("MERCADOPAGO API ERROR DETAIL: " + apiException.getApiResponse().getContent());
+            log.error("MERCADOPAGO API ERROR DETAIL: {}", apiException.getApiResponse().getContent(), apiException);
             throw new RuntimeException("Error al crear la preferencia de pago en MercadoPago", apiException);
         } catch (MPException e) {
-            System.err.println("MERCADOPAGO SDK ERROR: " + e.getMessage());
+            log.error("MERCADOPAGO SDK ERROR: {}", e.getMessage(), e);
             throw new RuntimeException("Error interno de MercadoPago", e);
         }
     }

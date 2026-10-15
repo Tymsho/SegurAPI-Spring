@@ -51,4 +51,7 @@ public class Poliza {
 
     @Column(name = "documento_url")
     private String documentoUrl;
+
+    public Poliza() {
+    }
 }

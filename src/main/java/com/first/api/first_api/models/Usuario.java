@@ -33,4 +33,7 @@ public class Usuario {
 
     @Column(name = "plan_suscripcion")
     private String plan = "BASICO";
+
+    public Usuario() {
+    }
 }

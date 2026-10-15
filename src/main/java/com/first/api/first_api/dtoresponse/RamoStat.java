@@ -1,13 +1,17 @@
 package com.first.api.first_api.dtoresponse;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RamoStat {
     private String nombre;
     private Long cantidad;
+
+    public RamoStat() {
+    }
+
+    public RamoStat(String nombre, Long cantidad) {
+        this.nombre = nombre;
+        this.cantidad = cantidad;
+    }
 }

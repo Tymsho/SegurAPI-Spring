@@ -1,5 +1,7 @@
 package com.first.api.first_api.services;
 
+import com.first.api.first_api.exceptions.ForbiddenOperationException;
+import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.models.Notificacion;
 import com.first.api.first_api.models.Usuario;
 import com.first.api.first_api.repositories.NotificacionRepository;
@@ -26,7 +28,7 @@ public class NotificacionService {
 
     public void enviarNotificacion(Long usuarioId, String titulo, String mensaje) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + usuarioId));
 
         Notificacion notificacion = new Notificacion();
         notificacion.setUsuario(usuario);
@@ -47,10 +49,10 @@ public class NotificacionService {
     public void marcarComoLeida(Long id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Notificacion notif = notificacionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Notificación no encontrada con id: " + id));
         
         if (!notif.getUsuario().getEmail().equals(email)) {
-            throw new RuntimeException("Acceso denegado a esta notificación");
+            throw new ForbiddenOperationException("Acceso denegado a esta notificación");
         }
         
         notif.setLeida(true);

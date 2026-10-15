@@ -36,4 +36,7 @@ public class ClienteRequest {
 
     @NotNull(message = "El tipo de IVA es obligatorio")
     private TipoIva tipoIva;
+
+    public ClienteRequest() {
+    }
 }

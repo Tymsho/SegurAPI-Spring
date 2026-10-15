@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,6 +35,13 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
     // Busca una póliza por ID asegurando la propiedad de la misma
     Optional<Poliza> findByIdAndProductorEmail(Long id, String email);
 
+    boolean existsByNroPza(String nroPza);
+
+    boolean existsByNroPzaAndIdNot(String nroPza, Long id);
+
+    @EntityGraph(attributePaths = {"tomador", "compania", "ramo"})
+    List<Poliza> findByProductorEmailAndActivoTrue(String email);
+
     @Query("SELECT COUNT(p) FROM Poliza p WHERE p.productor.email = :email AND p.activo = true")
     Long countActivePolizasByProductorEmail(@Param("email") String email);
 
@@ -48,26 +56,27 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
            "WHERE p.productor.email = :email AND p.activo = true " +
            "GROUP BY YEAR(p.inicioVigencia), MONTH(p.inicioVigencia) " +
            "ORDER BY YEAR(p.inicioVigencia) ASC, MONTH(p.inicioVigencia) ASC")
-    java.util.List<com.first.api.first_api.dtoresponse.MesStat> getPolizasPorMes(@Param("email") String email);
+    List<com.first.api.first_api.dtoresponse.MesStat> getPolizasPorMes(@Param("email") String email);
 
     @Query("SELECT new com.first.api.first_api.dtoresponse.CompaniaStat(p.compania.nombre, COUNT(p)) " +
            "FROM Poliza p " +
            "WHERE p.productor.email = :email AND p.activo = true " +
            "GROUP BY p.compania.nombre")
-    java.util.List<com.first.api.first_api.dtoresponse.CompaniaStat> getPolizasPorCompania(@Param("email") String email);
+    List<com.first.api.first_api.dtoresponse.CompaniaStat> getPolizasPorCompania(@Param("email") String email);
 
     @Query("SELECT new com.first.api.first_api.dtoresponse.RamoStat(p.ramo.nombre, COUNT(p)) " +
            "FROM Poliza p " +
            "WHERE p.productor.email = :email AND p.activo = true " +
            "GROUP BY p.ramo.nombre")
-    java.util.List<com.first.api.first_api.dtoresponse.RamoStat> getPolizasPorRamo(@Param("email") String email);
+    List<com.first.api.first_api.dtoresponse.RamoStat> getPolizasPorRamo(@Param("email") String email);
 
     @Query("SELECT new com.first.api.first_api.dtoresponse.PagoStat(p.tipoPago, COUNT(p)) " +
            "FROM Poliza p " +
            "WHERE p.productor.email = :email AND p.activo = true " +
            "GROUP BY p.tipoPago")
-    java.util.List<com.first.api.first_api.dtoresponse.PagoStat> getPolizasPorTipoPago(@Param("email") String email);
+    List<com.first.api.first_api.dtoresponse.PagoStat> getPolizasPorTipoPago(@Param("email") String email);
 
+    @EntityGraph(attributePaths = {"tomador", "compania", "productor"})
     @Query("SELECT p FROM Poliza p WHERE p.activo = true AND p.finVigencia = :targetDate")
-    java.util.List<Poliza> findPolizasVenciendoEn(@Param("targetDate") java.time.LocalDate targetDate);
+    List<Poliza> findPolizasVenciendoEn(@Param("targetDate") java.time.LocalDate targetDate);
 }

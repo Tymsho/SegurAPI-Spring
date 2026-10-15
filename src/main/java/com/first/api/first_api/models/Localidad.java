@@ -17,4 +17,7 @@ public class Localidad {
     @ManyToOne
     @JoinColumn(name = "provincia_id", nullable = false)
     private Provincia provincia;
+
+    public Localidad() {
+    }
 }

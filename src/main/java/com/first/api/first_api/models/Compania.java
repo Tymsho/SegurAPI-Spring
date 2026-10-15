@@ -15,4 +15,7 @@ public class Compania {
     private String nombre;
 
     private boolean activo = true;
+
+    public Compania() {
+    }
 }

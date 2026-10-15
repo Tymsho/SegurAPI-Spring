@@ -18,4 +18,7 @@ public class ClienteResponse {
     private String dni;
     private Sexo sexo;
     private TipoIva tipoIva;
+
+    public ClienteResponse() {
+    }
 }

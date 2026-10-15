@@ -11,8 +11,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import com.first.api.first_api.services.FileStorageService;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -20,9 +18,6 @@ public class ClienteController {
 
     @Autowired
     private ClienteService clienteService;
-
-    @Autowired
-    private FileStorageService fileStorageService;
 
     @PostMapping
     public ResponseEntity<ClienteResponse> crearCliente(@Valid @RequestBody ClienteRequest clienteDTO) {
@@ -54,13 +49,5 @@ public class ClienteController {
     public ResponseEntity<Void> anularCliente(@PathVariable Long id) {
         clienteService.bajaLogica(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{id}/foto")
-    public ResponseEntity<ClienteResponse> subirFotoCliente(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
-        String fileName = fileStorageService.guardarArchivo(file);
-        String fileDownloadUri = "/archivos/" + fileName;
-        ClienteResponse actualizado = clienteService.actualizarFoto(id, fileDownloadUri);
-        return ResponseEntity.ok(actualizado);
     }
 }

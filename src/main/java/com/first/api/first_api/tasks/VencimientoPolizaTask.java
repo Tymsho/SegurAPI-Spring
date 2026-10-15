@@ -6,6 +6,7 @@ import com.first.api.first_api.services.NotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,7 @@ public class VencimientoPolizaTask {
 
     // Se ejecuta todos los días a las 09:00 AM
     @Scheduled(cron = "0 0 9 * * ?")
+    @Transactional(readOnly = true)
     public void notificarPolizasProximasAVencer() {
         logger.info("Iniciando tarea programada: Verificación de pólizas próximas a vencer.");
 

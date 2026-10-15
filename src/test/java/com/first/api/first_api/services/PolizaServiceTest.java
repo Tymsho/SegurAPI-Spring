@@ -12,12 +12,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.first.api.first_api.exceptions.BusinessRuleException;
+import com.first.api.first_api.exceptions.DuplicateResourceException;
+import com.first.api.first_api.exceptions.ResourceNotFoundException;
+import com.first.api.first_api.mappers.PolizaMapper;
 import com.first.api.first_api.models.Poliza;
 import com.first.api.first_api.dtorequest.PolizaRequest;
 import com.first.api.first_api.dtoresponse.PolizaResponse;
 import com.first.api.first_api.repositories.PolizaRepository;
-import com.first.api.first_api.exceptions.ResourceNotFoundException;
-import com.first.api.first_api.mappers.PolizaMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -83,5 +85,41 @@ class PolizaServiceTest {
         });
 
         assertEquals("Póliza no encontrada o acceso denegado", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowBusinessRuleExceptionWhenFinVigenciaBeforeInicioVigencia() {
+        // ARRANGE
+        PolizaRequest dto = new PolizaRequest();
+        dto.setNroPza("POL-999");
+        dto.setInicioVigencia(LocalDate.of(2026, 6, 1));
+        dto.setFinVigencia(LocalDate.of(2026, 5, 1));
+
+        // ACT & ASSERT
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> {
+            polizaService.guardarPoliza(dto);
+        });
+
+        assertEquals("La fecha de fin de vigencia debe ser posterior a la fecha de inicio", ex.getMessage());
+        verify(polizaRepository, never()).save(any(Poliza.class));
+    }
+
+    @Test
+    void shouldThrowDuplicateResourceExceptionWhenNroPzaExists() {
+        // ARRANGE
+        PolizaRequest dto = new PolizaRequest();
+        dto.setNroPza("POL-DUP");
+        dto.setInicioVigencia(LocalDate.of(2026, 1, 1));
+        dto.setFinVigencia(LocalDate.of(2026, 12, 31));
+
+        when(polizaRepository.existsByNroPza("POL-DUP")).thenReturn(true);
+
+        // ACT & ASSERT
+        DuplicateResourceException ex = assertThrows(DuplicateResourceException.class, () -> {
+            polizaService.guardarPoliza(dto);
+        });
+
+        assertEquals("Ya existe una póliza registrada con ese número", ex.getMessage());
+        verify(polizaRepository, never()).save(any(Poliza.class));
     }
 }

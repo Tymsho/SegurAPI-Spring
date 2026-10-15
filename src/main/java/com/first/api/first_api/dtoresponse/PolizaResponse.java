@@ -21,4 +21,7 @@ public class PolizaResponse {
     private Double prima;
     private Double premio;
     private String documentoUrl;
+
+    public PolizaResponse() {
+    }
 }

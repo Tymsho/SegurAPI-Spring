@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "clientes")
+@Table(name = "clientes", uniqueConstraints = @UniqueConstraint(columnNames = {"dni", "productor_id"}))
 @Data
 public class Cliente {
     @Id
@@ -24,7 +24,7 @@ public class Cliente {
     private String direccion;
 
     @ManyToOne
-    @JoinColumn(name = "localidadd_id")
+    @JoinColumn(name = "localidad_id")
     private Localidad localidad;
 
     private String telefono;
@@ -32,7 +32,7 @@ public class Cliente {
     @Column(nullable = false)
     private String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String dni;
 
     @Enumerated(EnumType.STRING)
@@ -48,6 +48,6 @@ public class Cliente {
 
     private boolean activo = true;
 
-    @Column(name = "foto_url")
-    private String fotoUrl;
+    public Cliente() {
+    }
 }

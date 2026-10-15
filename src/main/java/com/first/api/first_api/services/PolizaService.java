@@ -3,6 +3,8 @@ package com.first.api.first_api.services;
 import com.first.api.first_api.models.*;
 import com.first.api.first_api.dtorequest.PolizaRequest;
 import com.first.api.first_api.dtoresponse.PolizaResponse;
+import com.first.api.first_api.exceptions.BusinessRuleException;
+import com.first.api.first_api.exceptions.DuplicateResourceException;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ public class PolizaService {
     private Usuario getProductorLogueado() {
         String email = getEmailLogueado();
         return usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Productor no autorizado o no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Productor no autorizado o no encontrado"));
     }
 
     // --- MAPEO INVERSO (DTO a Entidad) ---
@@ -63,6 +65,16 @@ public class PolizaService {
 
     @Transactional
     public PolizaResponse guardarPoliza(PolizaRequest polizaDTO) {
+        if (polizaDTO.getInicioVigencia() != null && polizaDTO.getFinVigencia() != null) {
+            if (!polizaDTO.getFinVigencia().isAfter(polizaDTO.getInicioVigencia())) {
+                throw new BusinessRuleException("La fecha de fin de vigencia debe ser posterior a la fecha de inicio");
+            }
+        }
+
+        if (polizaDTO.getNroPza() != null && polizaRepository.existsByNroPza(polizaDTO.getNroPza())) {
+            throw new DuplicateResourceException("Ya existe una póliza registrada con ese número");
+        }
+
         String email = getEmailLogueado();
         Usuario productor = getProductorLogueado();
 
@@ -104,6 +116,16 @@ public class PolizaService {
         // 1. Asegurar que la póliza a editar es suya
         Poliza polizaExistente = polizaRepository.findByIdAndProductorEmail(id, email)
                 .orElseThrow(() -> new ResourceNotFoundException("Póliza no encontrada o acceso denegado"));
+
+        if (detallesDTO.getInicioVigencia() != null && detallesDTO.getFinVigencia() != null) {
+            if (!detallesDTO.getFinVigencia().isAfter(detallesDTO.getInicioVigencia())) {
+                throw new BusinessRuleException("La fecha de fin de vigencia debe ser posterior a la fecha de inicio");
+            }
+        }
+
+        if (detallesDTO.getNroPza() != null && polizaRepository.existsByNroPzaAndIdNot(detallesDTO.getNroPza(), id)) {
+            throw new DuplicateResourceException("Ya existe una póliza registrada con ese número");
+        }
 
         // 2. Mapear los datos nuevos validando las FK
         Poliza actualizacion = convertirAEntidad(detallesDTO, email);

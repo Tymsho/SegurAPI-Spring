@@ -35,4 +35,7 @@ public class PolizaRequest {
 
     @DecimalMin(value = "0.01", message = "El premio debe ser mayor a cero")
     private Double premio;
+
+    public PolizaRequest() {
+    }
 }

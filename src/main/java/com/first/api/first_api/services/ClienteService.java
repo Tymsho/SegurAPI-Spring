@@ -5,11 +5,13 @@ import com.first.api.first_api.models.Localidad;
 import com.first.api.first_api.models.Usuario;
 import com.first.api.first_api.dtorequest.ClienteRequest;
 import com.first.api.first_api.dtoresponse.ClienteResponse;
+import com.first.api.first_api.exceptions.DuplicateResourceException;
 import com.first.api.first_api.exceptions.ResourceNotFoundException;
 import com.first.api.first_api.repositories.ClienteRepository;
 import com.first.api.first_api.repositories.LocalidadRepository;
 import com.first.api.first_api.repositories.UsuarioRepository;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,16 +39,21 @@ public class ClienteService {
     @Autowired
     private ClienteMapper clienteMapper;
 
+    // --- UTILIDAD: Obtener el Productor Logueado ---
+    private String getEmailLogueado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return (auth != null) ? auth.getName() : null;
+    }
+
     // --- MÉTODOS DEL SERVICIO (Devuelven DTOs) ---
 
     // Obtener solo clientes activos
     public Page<ClienteResponse> obtenerTodosActivos(String nombre, Pageable pageable) {
-        // 1. Obtener el productor logueado
-        String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
+        String emailLogueado = getEmailLogueado();
 
         Page<Cliente> clientes;
 
-        // 2. Filtrar asegurando que solo traiga SU cartera
+        // Filtrar asegurando que solo traiga SU cartera si hay email
         if (nombre != null && !nombre.isEmpty()) {
             clientes = clienteRepository.findByNombreContainingIgnoreCaseAndActivoTrueAndProductorEmail(nombre,
                     emailLogueado, pageable);
@@ -54,57 +61,59 @@ public class ClienteService {
             clientes = clienteRepository.findByActivoTrueAndProductorEmail(emailLogueado, pageable);
         }
 
-        // 3. Mapear a DTO
         return clientes.map(clienteMapper::toResponse);
     }
 
     public java.util.List<com.first.api.first_api.dtoresponse.ClienteLightResponse> buscarClientesLight(String query) {
-        String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
+        String emailLogueado = getEmailLogueado();
         return clienteRepository.searchClientesLight(emailLogueado, query, org.springframework.data.domain.PageRequest.of(0, 10));
     }
 
     // Buscar por ID
     public Optional<ClienteResponse> buscarPorId(Long id) {
-        return clienteRepository.findById(id)
-                .filter(Cliente::isActivo)
-                .map(clienteMapper::toResponse);
+        String email = getEmailLogueado();
+        Optional<Cliente> cliente = (email != null)
+                ? clienteRepository.findByIdAndProductorEmail(id, email)
+                : clienteRepository.findById(id);
+        return cliente.filter(Cliente::isActivo).map(clienteMapper::toResponse);
     }
 
     // Guardar (Recibe una Entidad por ahora, pero devuelve el DTO guardado)
     @Transactional
     public ClienteResponse crearCliente(ClienteRequest dto) {
-        // 1. Quién está haciendo la petición?
-        String emailLogueado = SecurityContextHolder.getContext().getAuthentication().getName();
+        String emailLogueado = getEmailLogueado();
 
         Usuario productor = usuarioRepository.findByEmail(emailLogueado)
-                .orElseThrow(() -> new RuntimeException("Productor no autorizado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Productor no autorizado"));
 
-        // 2. Validar que no exista el DNI en SU cartera
+        // Validar que no exista el DNI en SU cartera
         if (clienteRepository.existsByDniAndProductorEmail(dto.getDni(), emailLogueado)) {
-            throw new RuntimeException("Ya tenés un cliente registrado con este DNI");
+            throw new DuplicateResourceException("Ya tenés un cliente registrado con este DNI");
         }
 
-        // 3. Buscar las dependencias (Localidad)
+        // Buscar las dependencias (Localidad)
         Localidad localidad = localidadRepository.findById(dto.getLocalidadId())
-                .orElseThrow(() -> new RuntimeException("Localidad no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Localidad no encontrada"));
 
-        // 4. Mapear y guardar
+        // Mapear y guardar
         Cliente cliente = clienteMapper.toEntity(dto);
         cliente.setLocalidad(localidad);
 
-        // 5. Asignar el dueño (Aislamiento de datos)
+        // Asignar el dueño (Aislamiento de datos)
         cliente.setProductor(productor);
 
         Cliente guardado = clienteRepository.save(cliente);
 
-        // Retornar tu DTO mapeado
         return clienteMapper.toResponse(guardado);
     }
 
     // Baja Lógica (No devuelve nada, pero anula el registro)
     @Transactional
     public void bajaLogica(Long id) {
-        Optional<Cliente> clienteOpt = clienteRepository.findById(id);
+        String email = getEmailLogueado();
+        Optional<Cliente> clienteOpt = (email != null)
+                ? clienteRepository.findByIdAndProductorEmail(id, email)
+                : clienteRepository.findById(id);
         if (clienteOpt.isPresent()) {
             Cliente cliente = clienteOpt.get();
             cliente.setActivo(false);
@@ -115,18 +124,17 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteResponse actualizarFoto(Long id, String fotoUrl) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + id));
-        cliente.setFotoUrl(fotoUrl);
-        cliente = clienteRepository.save(cliente);
-        return clienteMapper.toResponse(cliente);
-    }
-
-    @Transactional
     public ClienteResponse actualizarCliente(Long id, ClienteRequest detallesDTO) {
-        Cliente clienteExistente = clienteRepository.findById(id)
+        String email = getEmailLogueado();
+        Cliente clienteExistente = (email != null ? clienteRepository.findByIdAndProductorEmail(id, email) : clienteRepository.findById(id))
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + id));
+
+        // Si cambió el DNI, verificar que no esté duplicado en su cartera
+        if (detallesDTO.getDni() != null && !detallesDTO.getDni().equals(clienteExistente.getDni())) {
+            if (email != null && clienteRepository.existsByDniAndProductorEmail(detallesDTO.getDni(), email)) {
+                throw new DuplicateResourceException("Ya tenés un cliente registrado con este DNI");
+            }
+        }
 
         clienteExistente.setNombre(detallesDTO.getNombre());
         clienteExistente.setApellido(detallesDTO.getApellido());
@@ -143,7 +151,7 @@ public class ClienteService {
         // Si cambia localidad
         if (detallesDTO.getLocalidadId() != null) {
             Localidad localidad = localidadRepository.findById(detallesDTO.getLocalidadId())
-                .orElseThrow(() -> new RuntimeException("Localidad no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Localidad no encontrada"));
             clienteExistente.setLocalidad(localidad);
         }
 
