@@ -45,8 +45,29 @@ public class AuthController {
         userMap.put("nombre", usuario.getNombre());
         userMap.put("email", usuario.getEmail());
         userMap.put("rol", usuario.getRol() != null ? usuario.getRol().name() : "PRODUCTOR");
+        userMap.put("plan", usuario.getPlan() != null ? usuario.getPlan() : "BASICO");
         
         response.put("user", userMap);
         return response;
+    }
+
+    @GetMapping("/me")
+    public Map<String, Object> getCurrentUser(Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        if (email == null) {
+            email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", usuario.getId());
+        userMap.put("nombre", usuario.getNombre());
+        userMap.put("email", usuario.getEmail());
+        userMap.put("rol", usuario.getRol() != null ? usuario.getRol().name() : "PRODUCTOR");
+        userMap.put("plan", usuario.getPlan() != null ? usuario.getPlan() : "BASICO");
+
+        return userMap;
     }
 }

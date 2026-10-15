@@ -49,6 +49,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         // 1. Rutas públicas y documentación
+                        .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/usuarios/registro").permitAll()
                         .requestMatchers("/api/usuarios/verificar").permitAll()
@@ -58,7 +59,6 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
-                        .requestMatchers("/api/pagos/webhook").permitAll()
                         .requestMatchers("/ws/**").permitAll() // Handshake de WebSockets
                         .requestMatchers(HttpMethod.GET, "/archivos/**").permitAll()
 
@@ -71,9 +71,12 @@ public class SecurityConfig {
                         // 3. Operaciones Comerciales y Funcionalidades: PRODUCTOR y ADMIN
                         .requestMatchers("/api/clientes/**", "/api/polizas/**").hasAnyRole("PRODUCTOR", "ADMIN")
                         .requestMatchers("/api/dashboard/**", "/api/reportes/**", "/api/notificaciones/**", 
-                                         "/api/companias/**", "/api/ramos/**", "/api/pagos/premium").hasAnyRole("PRODUCTOR", "ADMIN")
+                                         "/api/companias/**", "/api/ramos/**").hasAnyRole("PRODUCTOR", "ADMIN")
 
-                        // 4. Cualquier otra petición requiere autenticación
+                        // 4. Suscripción y pagos deshabilitados temporalmente en v1.0
+                        .requestMatchers("/api/pagos/**").denyAll()
+
+                        // 5. Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated());
 
         // Filtro JWT

@@ -23,7 +23,7 @@ import java.util.Collections;
 @Slf4j
 public class PagoService {
 
-    @Value("${mp.access.token}")
+    @Value("${mp.access.token:}")
     private String mpAccessToken;
 
     @Autowired
@@ -31,7 +31,9 @@ public class PagoService {
 
     @PostConstruct
     public void init() {
-        MercadoPagoConfig.setAccessToken(mpAccessToken);
+        if (mpAccessToken != null && !mpAccessToken.trim().isEmpty()) {
+            MercadoPagoConfig.setAccessToken(mpAccessToken);
+        }
     }
 
     public String crearPreferenciaPremium() {
