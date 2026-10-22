@@ -14,17 +14,14 @@ public class ClienteRequest {
     @NotBlank(message = "El apellido es obligatorio")
     private String apellido;
 
-    @NotNull(message = "La fecha de nacimiento es obligatoria")
     private LocalDate fechaNacimiento;
 
     private String direccion;
 
-    @NotNull(message = "La localidad es obligatoria")
     private Long localidadId;
 
     private String telefono;
 
-    @NotBlank(message = "El email es obligatorio")
     @Email(message = "El formato del email es inválido")
     private String email;
 

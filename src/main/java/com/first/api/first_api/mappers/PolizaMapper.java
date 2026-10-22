@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 public interface PolizaMapper {
 
     @Mapping(source = "tomador.id", target = "clienteId")
-    @Mapping(target = "nombreCliente", expression = "java(poliza.getTomador() != null ? poliza.getTomador().getNombre() + \" \" + poliza.getTomador().getApellido() : null)")
+    @Mapping(target = "nombreCliente", expression = "java(poliza.getTomador() != null ? ((poliza.getTomador().getNombre() != null && !poliza.getTomador().getNombre().isBlank() && !poliza.getTomador().getNombre().equals(\"-\")) ? poliza.getTomador().getNombre() + \" \" + poliza.getTomador().getApellido() : poliza.getTomador().getApellido()) : null)")
     @Mapping(source = "compania.id", target = "companiaId")
     @Mapping(source = "compania.nombre", target = "nombreCompania")
     @Mapping(source = "ramo.id", target = "ramoId")
@@ -24,5 +24,6 @@ public interface PolizaMapper {
     @Mapping(target = "productor", ignore = true)
     @Mapping(target = "activo", ignore = true)
     @Mapping(target = "documentoUrl", ignore = true)
+    @Mapping(target = "nroEndoso", expression = "java(dto.getNroEndoso() != null ? dto.getNroEndoso() : 0)")
     Poliza toEntity(PolizaRequest dto);
 }

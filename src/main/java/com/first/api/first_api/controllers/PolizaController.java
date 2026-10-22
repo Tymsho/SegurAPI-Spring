@@ -6,7 +6,9 @@ import com.first.api.first_api.services.PolizaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +38,18 @@ public class PolizaController {
             @RequestParam(required = false) Long clienteId,
             @RequestParam(required = false) Long companiaId,
             @RequestParam(required = false) Long ramoId,
-            @PageableDefault(size = 10) Pageable pageable) {
+            @RequestParam(required = false) Boolean ocultarPremioCero,
+            @PageableDefault(size = 10, sort = {"premio", "id"}, direction = Sort.Direction.DESC) Pageable pageable) {
         
-        Page<PolizaResponse> polizas = polizaService.obtenerMisPolizasActivas(nroPza, clienteId, companiaId, ramoId, pageable);
+        if (pageable.getSort().isUnsorted()) {
+            pageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "premio").and(Sort.by(Sort.Direction.DESC, "id"))
+            );
+        }
+
+        Page<PolizaResponse> polizas = polizaService.obtenerMisPolizasActivas(nroPza, clienteId, companiaId, ramoId, ocultarPremioCero, pageable);
         return ResponseEntity.ok(polizas);
     }
 

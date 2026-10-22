@@ -76,7 +76,6 @@ class PolizaControllerTest {
                     "ramoId": 1,
                     "companiaId": 1,
                     "tipoFacturacion": "MENSUAL",
-                    "prima": 1000.0,
                     "premio": 1200.0
                 }
                 """;
@@ -118,5 +117,16 @@ class PolizaControllerTest {
 
         mockMvc.perform(get("/api/polizas/999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void shouldReturnPolizasWithDefaultSortAndFilter() throws Exception {
+        org.springframework.data.domain.Page<PolizaResponse> page = new org.springframework.data.domain.PageImpl<>(java.util.List.of());
+        when(polizaService.obtenerMisPolizasActivas(any(), any(), any(), any(), any(), any())).thenReturn(page);
+
+        mockMvc.perform(get("/api/polizas")
+                .param("ocultarPremioCero", "true"))
+                .andExpect(status().isOk());
     }
 }

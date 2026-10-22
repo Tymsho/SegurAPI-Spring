@@ -57,6 +57,10 @@ public class PolizaService {
         Ramo ramo = ramoRepository.findById(dto.getRamoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ramo no encontrado"));
         poliza.setRamo(ramo);
+
+        if (poliza.getFechaEmision() == null) {
+            poliza.setFechaEmision(poliza.getInicioVigencia());
+        }
         
         return poliza;
     }
@@ -94,9 +98,13 @@ public class PolizaService {
                 .map(polizaMapper::toResponse);
     }
 
-    public Page<PolizaResponse> obtenerMisPolizasActivas(String nroPza, Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
-        return polizaRepository.findMisPolizasFiltradas(getEmailLogueado(), nroPza, clienteId, companiaId, ramoId, pageable)
+    public Page<PolizaResponse> obtenerMisPolizasActivas(String nroPza, Long clienteId, Long companiaId, Long ramoId, Boolean ocultarPremioCero, Pageable pageable) {
+        return polizaRepository.findMisPolizasFiltradas(getEmailLogueado(), nroPza, clienteId, companiaId, ramoId, ocultarPremioCero, pageable)
                 .map(polizaMapper::toResponse);
+    }
+
+    public Page<PolizaResponse> obtenerMisPolizasActivas(String nroPza, Long clienteId, Long companiaId, Long ramoId, Pageable pageable) {
+        return obtenerMisPolizasActivas(nroPza, clienteId, companiaId, ramoId, false, pageable);
     }
 
     @Transactional
@@ -133,9 +141,13 @@ public class PolizaService {
         polizaExistente.setNroPza(actualizacion.getNroPza());
         polizaExistente.setInicioVigencia(actualizacion.getInicioVigencia());
         polizaExistente.setFinVigencia(actualizacion.getFinVigencia());
+        if (actualizacion.getFechaEmision() != null) {
+            polizaExistente.setFechaEmision(actualizacion.getFechaEmision());
+        }
         polizaExistente.setTipoPago(actualizacion.getTipoPago());
         polizaExistente.setTipoFacturacion(actualizacion.getTipoFacturacion());
-        polizaExistente.setPrima(actualizacion.getPrima());
+        polizaExistente.setBienAsegurado(actualizacion.getBienAsegurado());
+        if (actualizacion.getNroEndoso() != null) polizaExistente.setNroEndoso(actualizacion.getNroEndoso());
         polizaExistente.setPremio(actualizacion.getPremio());
         
         polizaExistente.setTomador(actualizacion.getTomador());

@@ -44,7 +44,7 @@ public class DataSeeder implements CommandLineRunner {
         cargarGeografia();
         cargarUsuarios();
         cargarDatosComerciales();
-        cargarClientesYPolizas();
+        // cargarClientesYPolizas(); // Desactivado para mantener clientes y pólizas limpios en cero para importación
     }
 
     private void cargarGeografia() {
@@ -93,7 +93,8 @@ public class DataSeeder implements CommandLineRunner {
             "Galeno Life", "Prudential Seguros", "Zurich International Life", "La Estrella",
             "Orígenes Seguros", "Binaria Seguros de Vida", "Prevención ART", "Asociart ART",
             "Provincia ART", "Galeno ART", "Experta ART", "Swiss Medical ART", "La Segunda ART",
-            "Aseguradores de Cauciones", "Afianzadora Latinoamericana", "Crédito y Caución", "Insur"
+            "Aseguradores de Cauciones", "Afianzadora Latinoamericana", "Crédito y Caución", "Insur",
+            "Noble Seguros"
         );
 
         List<String> existentesCompanias = companiaRepository.findAll().stream().map(Compania::getNombre).collect(Collectors.toList());
@@ -110,7 +111,7 @@ public class DataSeeder implements CommandLineRunner {
             "Incendio", "Transporte (Cascos y Carga)", "Caución", "Responsabilidad Civil",
             "Riesgos Agrícolas / Granizo", "Técnico", "Crédito", "Vida Individual",
             "Vida Colectivo", "Vida Obligatorio", "Accidentes Personales (AP)", "Retiro",
-            "Sepelio", "Riesgos del Trabajo (ART)"
+            "Sepelio", "Riesgos del Trabajo (ART)", "Salud"
         );
 
         List<String> existentesRamos = ramoRepository.findAll().stream().map(Ramo::getNombre).collect(Collectors.toList());
@@ -179,8 +180,8 @@ public class DataSeeder implements CommandLineRunner {
                 LocalDate fin = inicio.plusYears(1);
                 
                 // Random prime between 5000 and 150000
-                double prima = 5000 + (rand.nextDouble() * 145000);
-                double premio = prima * 1.21; // add VAT roughly
+                double premioBase = 5000 + (rand.nextDouble() * 145000);
+                double premio = premioBase * 1.21; // add VAT roughly
                 
                 TipoPago[] pagos = TipoPago.values();
                 TipoPago pago = pagos[rand.nextInt(pagos.length)];
@@ -195,7 +196,8 @@ public class DataSeeder implements CommandLineRunner {
                 p.setRamo(ramo);
                 p.setCompania(compania);
                 p.setTipoFacturacion(rand.nextBoolean() ? "Mensual" : "Anual");
-                p.setPrima(Math.round(prima * 100.0) / 100.0);
+                p.setBienAsegurado("Riesgo Demo #" + (i + 1));
+                p.setNroEndoso(0);
                 p.setPremio(Math.round(premio * 100.0) / 100.0);
                 p.setActivo(true);
                 

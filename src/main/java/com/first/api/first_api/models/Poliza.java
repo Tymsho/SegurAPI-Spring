@@ -33,6 +33,9 @@ public class Poliza {
     @Column(name = "fin_vigencia", nullable = false)
     private LocalDate finVigencia;
 
+    @Column(name = "fecha_emision")
+    private LocalDate fechaEmision;
+
     @ManyToOne
     @JoinColumn(name = "ramo_id", nullable = false)
     private Ramo ramo;
@@ -43,6 +46,12 @@ public class Poliza {
 
     @Column(name = "tipo_facturacion")
     private String tipoFacturacion;
+
+    @Column(name = "bien_asegurado")
+    private String bienAsegurado;
+
+    @Column(name = "nro_endoso")
+    private Integer nroEndoso = 0;
 
     private Double prima;
     private Double premio;

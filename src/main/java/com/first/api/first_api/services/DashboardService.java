@@ -25,7 +25,6 @@ public class DashboardService {
         response.setCantClientesActivos(clienteRepository.countActiveClientesByProductorEmail(emailLogueado));
         response.setCantPolizasActivas(polizaRepository.countActivePolizasByProductorEmail(emailLogueado));
         response.setTotalPremios(polizaRepository.sumPremioByProductorEmail(emailLogueado));
-        response.setTotalPrimas(polizaRepository.sumPrimaByProductorEmail(emailLogueado));
         response.setPolizasPorMes(polizaRepository.getPolizasPorMes(emailLogueado));
         response.setPolizasPorCompania(polizaRepository.getPolizasPorCompania(emailLogueado));
         response.setPolizasPorRamo(polizaRepository.getPolizasPorRamo(emailLogueado));

@@ -12,7 +12,7 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String nombre;
 
     @Column(nullable = false)
@@ -29,7 +29,7 @@ public class Cliente {
 
     private String telefono;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String email;
 
     @Column(nullable = false)

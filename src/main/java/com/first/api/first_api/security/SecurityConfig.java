@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
                         // 3. Operaciones Comerciales y Funcionalidades: PRODUCTOR y ADMIN
-                        .requestMatchers("/api/clientes/**", "/api/polizas/**").hasAnyRole("PRODUCTOR", "ADMIN")
+                        .requestMatchers("/api/clientes/**", "/api/polizas/**", "/api/importacion/**").hasAnyRole("PRODUCTOR", "ADMIN")
                         .requestMatchers("/api/dashboard/**", "/api/reportes/**", "/api/notificaciones/**", 
                                          "/api/companias/**", "/api/ramos/**").hasAnyRole("PRODUCTOR", "ADMIN")
 

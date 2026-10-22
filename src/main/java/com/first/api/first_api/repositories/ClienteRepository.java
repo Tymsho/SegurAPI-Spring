@@ -41,4 +41,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     @Query("SELECT COUNT(c) FROM Cliente c WHERE c.productor.email = :email AND c.activo = true")
     Long countActiveClientesByProductorEmail(@Param("email") String email);
+
+    java.util.List<Cliente> findAllByProductorEmail(String email);
 }

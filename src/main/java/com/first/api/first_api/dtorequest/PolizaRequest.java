@@ -22,6 +22,8 @@ public class PolizaRequest {
     @NotNull(message = "La fecha de fin de vigencia es obligatoria")
     private LocalDate finVigencia;
 
+    private LocalDate fechaEmision;
+
     @NotNull(message = "El ramo es obligatorio")
     private Long ramoId;
 
@@ -30,10 +32,11 @@ public class PolizaRequest {
 
     private String tipoFacturacion;
 
-    @Min(value = 0, message = "La prima no puede ser negativa")
-    private Double prima;
+    private String bienAsegurado;
 
-    @DecimalMin(value = "0.01", message = "El premio debe ser mayor a cero")
+    private Integer nroEndoso = 0;
+
+    @Min(value = 0, message = "El premio no puede ser negativo")
     private Double premio;
 
     public PolizaRequest() {

@@ -19,13 +19,15 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
            "AND (:nroPza IS NULL OR LOWER(p.nroPza) LIKE LOWER(CONCAT('%', CAST(:nroPza AS string), '%'))) " +
            "AND (:clienteId IS NULL OR p.tomador.id = :clienteId) " +
            "AND (:companiaId IS NULL OR p.compania.id = :companiaId) " +
-           "AND (:ramoId IS NULL OR p.ramo.id = :ramoId)")
+           "AND (:ramoId IS NULL OR p.ramo.id = :ramoId) " +
+           "AND (:ocultarPremioCero IS NULL OR :ocultarPremioCero = false OR (p.premio IS NOT NULL AND p.premio > 0.0))")
     Page<Poliza> findMisPolizasFiltradas(
         @Param("email") String email,
         @Param("nroPza") String nroPza,
         @Param("clienteId") Long clienteId,
         @Param("companiaId") Long companiaId,
         @Param("ramoId") Long ramoId,
+        @Param("ocultarPremioCero") Boolean ocultarPremioCero,
         Pageable pageable
     );
 
@@ -39,6 +41,13 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
 
     boolean existsByNroPzaAndIdNot(String nroPza, Long id);
 
+    boolean existsByNroPzaAndCompaniaIdAndProductorEmail(String nroPza, Long companiaId, String email);
+
+    boolean existsByNroPzaAndCompaniaIdAndProductorEmailAndIdNot(String nroPza, Long companiaId, String email, Long id);
+
+    @EntityGraph(attributePaths = {"tomador", "compania", "ramo"})
+    List<Poliza> findAllByProductorEmail(String email);
+
     @EntityGraph(attributePaths = {"tomador", "compania", "ramo"})
     List<Poliza> findByProductorEmailAndActivoTrue(String email);
 
@@ -48,14 +57,15 @@ public interface PolizaRepository extends JpaRepository<Poliza, Long> {
     @Query("SELECT COALESCE(SUM(p.premio), 0.0) FROM Poliza p WHERE p.productor.email = :email AND p.activo = true")
     Double sumPremioByProductorEmail(@Param("email") String email);
 
-    @Query("SELECT COALESCE(SUM(p.prima), 0.0) FROM Poliza p WHERE p.productor.email = :email AND p.activo = true")
-    Double sumPrimaByProductorEmail(@Param("email") String email);
-
-    @Query("SELECT new com.first.api.first_api.dtoresponse.MesStat(YEAR(p.inicioVigencia), MONTH(p.inicioVigencia), COUNT(p)) " +
+    @Query("SELECT new com.first.api.first_api.dtoresponse.MesStat(" +
+           "YEAR(COALESCE(p.fechaEmision, p.inicioVigencia)), " +
+           "MONTH(COALESCE(p.fechaEmision, p.inicioVigencia)), " +
+           "COUNT(p), " +
+           "COALESCE(SUM(p.premio), 0.0)) " +
            "FROM Poliza p " +
            "WHERE p.productor.email = :email AND p.activo = true " +
-           "GROUP BY YEAR(p.inicioVigencia), MONTH(p.inicioVigencia) " +
-           "ORDER BY YEAR(p.inicioVigencia) ASC, MONTH(p.inicioVigencia) ASC")
+           "GROUP BY YEAR(COALESCE(p.fechaEmision, p.inicioVigencia)), MONTH(COALESCE(p.fechaEmision, p.inicioVigencia)) " +
+           "ORDER BY YEAR(COALESCE(p.fechaEmision, p.inicioVigencia)) ASC, MONTH(COALESCE(p.fechaEmision, p.inicioVigencia)) ASC")
     List<com.first.api.first_api.dtoresponse.MesStat> getPolizasPorMes(@Param("email") String email);
 
     @Query("SELECT new com.first.api.first_api.dtoresponse.CompaniaStat(p.compania.nombre, COUNT(p)) " +

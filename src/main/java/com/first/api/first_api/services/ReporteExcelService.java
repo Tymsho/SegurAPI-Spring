@@ -53,7 +53,7 @@ public class ReporteExcelService {
                 Sheet sheet = workbook.createSheet(sheetName);
 
                 Row headerRow = sheet.createRow(0);
-                String[] columns = {"Nro Póliza", "Ramo", "Compañía", "Inicio Vigencia", "Fin Vigencia", "Prima", "Premio", "Estado"};
+                String[] columns = {"Nro Póliza", "Ramo", "Compañía", "Inicio Vigencia", "Fin Vigencia", "Bien Asegurado", "Premio", "Estado"};
                 
                 for (int i = 0; i < columns.length; i++) {
                     Cell cell = headerRow.createCell(i);
@@ -71,7 +71,7 @@ public class ReporteExcelService {
                     row.createCell(2).setCellValue(poliza.getCompania() != null ? poliza.getCompania().getNombre() : "");
                     row.createCell(3).setCellValue(poliza.getInicioVigencia() != null ? poliza.getInicioVigencia().toString() : "");
                     row.createCell(4).setCellValue(poliza.getFinVigencia() != null ? poliza.getFinVigencia().toString() : "");
-                    row.createCell(5).setCellValue(poliza.getPrima() != null ? poliza.getPrima() : 0.0);
+                    row.createCell(5).setCellValue(poliza.getBienAsegurado() != null ? poliza.getBienAsegurado() : "-");
                     row.createCell(6).setCellValue(poliza.getPremio() != null ? poliza.getPremio() : 0.0);
                     row.createCell(7).setCellValue(poliza.isActivo() ? "Activa" : "Anulada");
                 }
