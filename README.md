@@ -1,111 +1,111 @@
-# 🛡️ SegurAPI — Sistema de Gestión de Pólizas y Cartera de Seguros
+# 🛡️ SegurAPI — Insurance Policy & Portfolio Management System
 
-API RESTful desarrollada con **Java 17** y **Spring Boot 3.5**, diseñada para la gestión integral de carteras de clientes, pólizas, compañías aseguradoras, importación de datos y notificaciones para Productores Asesores de Seguros.
-
----
-
-## ⚙️ Arquitectura y Características Principales
-
-* **Arquitectura en Capas:** Separación estricta entre Controladores (`REST`), Servicios (lógica de negocio), Repositorios (`Spring Data JPA`) y transferencia de datos mediante `DTOs` (Requests/Responses).
-* **Seguridad Stateless (JWT):** Autenticación basada en JSON Web Tokens, encriptación de contraseñas con `BCrypt`, configuración dinámica de CORS y control de acceso basado en roles (`ADMIN` y `PRODUCTOR`).
-* **Base de Datos Cloud-Ready (PostgreSQL):** Configurada para **PostgreSQL / Supabase** con el pool de conexiones **HikariCP** optimizado para entornos cloud y serverless.
-* **Módulos del Sistema:**
-  * Gestión de **Clientes** y **Pólizas** con filtros avanzados y consultas personalizadas (`JPQL`).
-  * Catálogo preconfigurado de **Compañías Aseguradoras**, **Ramos** y **Geografía** (Provincias y Localidades).
-  * Gestión de **Plantillas de Importación** y sistema de **Notificaciones** vía correo electrónico (`SMTP`).
-* **Manejo Centralizado de Errores:** Validaciones declarativas (`@Valid`) y captura global mediante `GlobalExceptionHandler` con respuestas HTTP estandarizadas.
-* **Testing Automatizado:** Pruebas unitarias y de integración en capas de servicio y controladores con `JUnit 5`, `Mockito` y `MockMvc`.
+RESTful API built with **Java 17** and **Spring Boot 3.5**, designed for the comprehensive management of client portfolios, insurance policies, insurance companies, data imports, and notifications for Insurance Brokers and Producers.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## ⚙️ Architecture & Core Features
 
-* **Lenguaje y Framework:** Java 17, Spring Boot 3.5.x
-* **Persistencia:** Spring Data JPA, Hibernate, PostgreSQL Driver, HikariCP
-* **Seguridad:** Spring Security, JJWT (JSON Web Token)
-* **Notificaciones:** Spring Boot Starter Mail (SMTP)
+* **Layered Architecture:** Strict separation of concerns across Controllers (`REST`), Services (business logic), Repositories (`Spring Data JPA`), and data transfer via `DTOs` (Requests/Responses).
+* **Stateless Security (JWT):** JSON Web Token-based authentication, password hashing with `BCrypt`, dynamic CORS configuration, and role-based access control (`ADMIN` and `PRODUCTOR`).
+* **Cloud-Ready Database (PostgreSQL):** Configured for **PostgreSQL / Supabase** with a **HikariCP** connection pool optimized for cloud and serverless environments.
+* **System Modules:**
+  * **Client** and **Policy** management featuring advanced filtering and custom queries (`JPQL`).
+  * Pre-configured catalog of **Insurance Companies**, **Insurance Lines (Ramos)**, and **Geography** (Provinces and Cities).
+  * **Import Template** management and automated email **Notification** system (`SMTP`).
+* **Centralized Exception Handling:** Declarative validations (`@Valid`) and global error interception via `GlobalExceptionHandler` returning standardized HTTP responses.
+* **Automated Testing:** Unit and integration testing across service and controller layers using `JUnit 5`, `Mockito`, and `MockMvc`.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Language & Framework:** Java 17, Spring Boot 3.5.x
+* **Persistence:** Spring Data JPA, Hibernate, PostgreSQL Driver, HikariCP
+* **Security:** Spring Security, JJWT (JSON Web Token)
+* **Notifications:** Spring Boot Starter Mail (SMTP)
 * **Testing:** JUnit 5, Mockito, MockMvc
 
 ---
 
-## 🚀 Configuración y Variables de Entorno
+## 🚀 Configuration & Environment Variables
 
-El proyecto soporta la carga nativa de archivos `.env` en la raíz del proyecto o variables de entorno inyectadas desde el servidor de despliegue.
+The project natively supports loading `.env` files located in the project root or environment variables injected directly by the deployment host.
 
-Creá un archivo `.env` en la raíz del repositorio basándote en la siguiente estructura:
+Create a `.env` file in the root directory based on the following template:
 
 ```properties
-# Servidor
+# Server
 PORT=8080
 
-# Base de Datos (PostgreSQL / Supabase Session Pooler)
+# Database (PostgreSQL / Supabase Session Pooler)
 DB_URL=jdbc:postgresql://[aws-0-sa-east-1.pooler.supabase.com:5432/postgres?prepareThreshold=0&sslmode=require](https://aws-0-sa-east-1.pooler.supabase.com:5432/postgres?prepareThreshold=0&sslmode=require)
-DB_USERNAME=postgres.tu_referencia_proyecto
-DB_PASSWORD=tu_password_seguro
+DB_USERNAME=postgres.your_project_ref
+DB_PASSWORD=your_secure_password
 DB_POOL_SIZE=5
 
 # Hibernate / JPA
 JPA_DDL_AUTO=update
 JPA_SHOW_SQL=false
 
-# Seguridad JWT (Mínimo 32 bytes / 256 bits)
-JWT_SECRET=TuClaveSecretaDeProduccionConMasDe32BytesDeLongitud
+# JWT Security (Minimum 32 bytes / 256 bits)
+JWT_SECRET=YourProductionSecretKeyWithMoreThan32BytesLength
 JWT_EXPIRATION=86400000
 
-# CORS (Orígenes permitidos separados por coma)
-CORS_ALLOWED_ORIGINS=http://localhost:5173,[https://tu-frontend.vercel.app](https://tu-frontend.vercel.app)
+# CORS (Comma-separated allowed origins)
+CORS_ALLOWED_ORIGINS=http://localhost:5173,[https://your-frontend.vercel.app](https://your-frontend.vercel.app)
 
-# Seeder y Usuario Administrador Inicial
+# Seeder & Initial Admin User
 SEEDER_ENABLED=true
-ADMIN_EMAIL=tu_email@dominio.com
-ADMIN_NOMBRE=Administrador
-ADMIN_PASSWORD=TuPasswordAdminSeguro
+ADMIN_EMAIL=your_email@domain.com
+ADMIN_NOMBRE=Administrator
+ADMIN_PASSWORD=YourSecureAdminPassword
 
-# Servidor de Correo (SMTP Gmail)
-MAIL_USERNAME=tu_correo@gmail.com
-MAIL_PASSWORD=tu_app_password_de_gmail
+# Mail Server (Gmail SMTP)
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_gmail_app_password
 ```
 
 ---
 
-## 💻 Ejecución Local
+## 💻 Local Execution
 
-1. **Clonar el repositorio:**
+1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/tu-usuario/SegurAPI-Spring.git](https://github.com/tu-usuario/SegurAPI-Spring.git)
+   git clone [https://github.com/your-username/SegurAPI-Spring.git](https://github.com/your-username/SegurAPI-Spring.git)
    cd SegurAPI-Spring
    ```
-2. **Configurar el entorno:**
-   Crear el archivo `.env` con las credenciales de tu instancia local de PostgreSQL o tu proyecto de Supabase.
-3. **Ejecutar la aplicación:**
+2. **Configure the environment:**
+   Create the `.env` file using the credentials from your local PostgreSQL instance or your Supabase project.
+3. **Run the application:**
    ```bash
    ./mvnw spring-boot:run
    ```
-   La API quedará disponible en `http://localhost:8080`.
+   The API will be available at `http://localhost:8080`.
 
 ---
 
-## 🌱 Inicialización de Datos (`DataSeeder`)
+## 🌱 Data Initialization (`DataSeeder`)
 
-Al iniciar la aplicación con `SEEDER_ENABLED=true`, el componente `DataSeeder.java` verifica e inicializa de forma idempotente únicamente los catálogos base:
-1. **Geografía inicial:** Provincias y localidades base (si la tabla está vacía).
-2. **Catálogo oficial:** 37 compañías aseguradoras y 10 ramos principales.
-3. **Usuario Administrador:** Si no existe un usuario con el correo definido en `ADMIN_EMAIL`, lo crea automáticamente con rol `ADMIN` y la contraseña definida en `ADMIN_PASSWORD` encriptada con `BCrypt`. No se inyectan clientes ni pólizas de prueba ni credenciales por defecto.
+When starting the application with `SEEDER_ENABLED=true`, the `DataSeeder.java` component idempotently verifies and initializes only the base catalogs:
+1. **Initial Geography:** Base provinces and cities (if the table is empty).
+2. **Official Catalog:** 37 insurance companies and 10 primary insurance lines.
+3. **Administrator User:** If no user exists matching the email defined in `ADMIN_EMAIL`, it automatically creates one with the `ADMIN` role and hashes the password defined in `ADMIN_PASSWORD` using `BCrypt`. No mock clients, test policies, or default hardcoded credentials are injected.
 
 ---
 
-## 🔑 Autenticación y Uso de la API
+## 🔑 Authentication & API Usage
 
-Para consumir los endpoints protegidos, realizá una petición `POST` a `/api/auth/login` enviando las credenciales configuradas en tus variables de entorno:
+To consume protected endpoints, send a `POST` request to `/api/auth/login` with the credentials configured in your environment variables:
 
 ```json
 {
-  "email": "tu_email@dominio.com",
-  "password": "TuPasswordAdminSeguro"
+  "email": "your_email@domain.com",
+  "password": "YourSecureAdminPassword"
 }
 ```
 
-La respuesta devolverá el token JWT, que debés incluir en el header de las siguientes peticiones:
+The response will return a JWT token, which must be included in the header of subsequent requests:
 ```http
-Authorization: Bearer <tu_token_jwt>
+Authorization: Bearer <your_jwt_token>
 ```
